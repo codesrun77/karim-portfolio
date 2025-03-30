@@ -3,6 +3,8 @@
 import { useEffect } from 'react';
 import { Toaster } from 'react-hot-toast';
 import dynamic from 'next/dynamic';
+
+// استيراد دالة تهيئة Firebase من ملف firebase.ts
 import { initializeFirebase } from '@/lib/firebase';
 
 // استيراد ديناميكي لمكون OfflineNotice لتجنب أخطاء الـ SSR
@@ -16,7 +18,9 @@ export default function ClientProviders({ fontFamily }: ClientProvidersProps) {
   // تهيئة Firebase عندما يتم تحميل المكون
   useEffect(() => {
     try {
+      // استدعاء دالة التهيئة
       initializeFirebase();
+      console.log('تم استدعاء تهيئة Firebase في ClientProviders');
     } catch (error) {
       console.error('فشل تهيئة Firebase في ClientProviders:', error);
     }
