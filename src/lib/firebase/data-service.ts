@@ -877,7 +877,57 @@ export const DataService = {
   
   // معلومات الاتصال
   getContactInfo: async (): Promise<ContactInfo[]> => {
-    return await DataService.getData<ContactInfo[]>("siteData", "contactInfo", DEFAULT_DATA.contactInfo);
+    console.log("[DataService] جاري تحميل معلومات الاتصال...");
+    
+    // حماية من استدعاء الدالة على جانب الخادم
+    if (typeof window === 'undefined') {
+      console.log("[DataService] getContactInfo: تم الاستدعاء على جانب الخادم، إرجاع القيم الافتراضية");
+      return DEFAULT_DATA.contactInfo;
+    }
+    
+    try {
+      // الحصول على مثيل Firestore
+      const firestore = getFirestoreInstance();
+      if (!firestore) {
+        console.error("[DataService] Firestore غير متاح، استخدام البيانات الافتراضية");
+        return DEFAULT_DATA.contactInfo;
+      }
+      
+      // محاولة قراءة البيانات من Firestore
+      const docRef = doc(firestore as Firestore, "siteData", "contactInfo");
+      const docSnap = await getDoc(docRef);
+      
+      if (docSnap.exists()) {
+        const data = docSnap.data();
+        if (data.items && Array.isArray(data.items)) {
+          console.log("[DataService] تم العثور على بيانات الاتصال في Firestore:", data.items.length);
+          
+          // تحديث التخزين المحلي بأحدث البيانات
+          localStorage.setItem("contactInfo", JSON.stringify(data.items));
+          
+          return data.items as ContactInfo[];
+        }
+      }
+      
+      // محاولة استعادة البيانات من localStorage
+      const localData = localStorage.getItem("contactInfo");
+      if (localData) {
+        try {
+          const contactInfo = JSON.parse(localData) as ContactInfo[];
+          console.log("[DataService] تم قراءة معلومات الاتصال من التخزين المحلي:", contactInfo.length);
+          return contactInfo;
+        } catch (e) {
+          console.error("[DataService] خطأ في تحليل بيانات الاتصال من التخزين المحلي:", e);
+        }
+      }
+      
+      // استخدام البيانات الافتراضية
+      console.log("[DataService] استخدام البيانات الافتراضية لمعلومات الاتصال");
+      return DEFAULT_DATA.contactInfo;
+    } catch (error) {
+      console.error("[DataService] خطأ في قراءة بيانات الاتصال:", error);
+      return DEFAULT_DATA.contactInfo;
+    }
   },
   
   saveContactInfo: async (data: ContactInfo[]): Promise<boolean> => {
@@ -932,7 +982,57 @@ export const DataService = {
   
   // روابط التواصل الاجتماعي
   getSocialLinks: async (): Promise<SocialLink[]> => {
-    return await DataService.getData<SocialLink[]>("siteData", "socialLinks", DEFAULT_DATA.socialLinks);
+    console.log("[DataService] جاري تحميل روابط التواصل الاجتماعي...");
+    
+    // حماية من استدعاء الدالة على جانب الخادم
+    if (typeof window === 'undefined') {
+      console.log("[DataService] getSocialLinks: تم الاستدعاء على جانب الخادم، إرجاع القيم الافتراضية");
+      return DEFAULT_DATA.socialLinks;
+    }
+    
+    try {
+      // الحصول على مثيل Firestore
+      const firestore = getFirestoreInstance();
+      if (!firestore) {
+        console.error("[DataService] Firestore غير متاح، استخدام البيانات الافتراضية");
+        return DEFAULT_DATA.socialLinks;
+      }
+      
+      // محاولة قراءة البيانات من Firestore
+      const docRef = doc(firestore as Firestore, "siteData", "socialLinks");
+      const docSnap = await getDoc(docRef);
+      
+      if (docSnap.exists()) {
+        const data = docSnap.data();
+        if (data.items && Array.isArray(data.items)) {
+          console.log("[DataService] تم العثور على روابط التواصل الاجتماعي في Firestore:", data.items.length);
+          
+          // تحديث التخزين المحلي بأحدث البيانات
+          localStorage.setItem("socialLinks", JSON.stringify(data.items));
+          
+          return data.items as SocialLink[];
+        }
+      }
+      
+      // محاولة استعادة البيانات من localStorage
+      const localData = localStorage.getItem("socialLinks");
+      if (localData) {
+        try {
+          const socialLinks = JSON.parse(localData) as SocialLink[];
+          console.log("[DataService] تم قراءة روابط التواصل الاجتماعي من التخزين المحلي:", socialLinks.length);
+          return socialLinks;
+        } catch (e) {
+          console.error("[DataService] خطأ في تحليل روابط التواصل الاجتماعي من التخزين المحلي:", e);
+        }
+      }
+      
+      // استخدام البيانات الافتراضية
+      console.log("[DataService] استخدام البيانات الافتراضية لروابط التواصل الاجتماعي");
+      return DEFAULT_DATA.socialLinks;
+    } catch (error) {
+      console.error("[DataService] خطأ في قراءة روابط التواصل الاجتماعي:", error);
+      return DEFAULT_DATA.socialLinks;
+    }
   },
   
   saveSocialLinks: async (data: SocialLink[]): Promise<boolean> => {
