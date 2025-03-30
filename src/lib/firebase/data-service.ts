@@ -1790,43 +1790,80 @@ export const {
 // إضافة دوال التصنيفات
 export const getCategories = async (): Promise<Category[]> => {
   try {
-    console.log('جاري تحميل التصنيفات من Firebase...');
+    console.log('[DataService] جاري تحميل التصنيفات من Firebase...');
     
     // تحقق إذا كنا في بيئة الخادم
     if (typeof window === 'undefined') {
-      console.log('تم الاستدعاء على جانب الخادم، استخدام القيم الافتراضية');
+      console.log('[DataService] تم الاستدعاء على جانب الخادم، استخدام القيم الافتراضية');
       return DEFAULT_DATA.categories;
     }
     
-    // التحقق من وجود db
-    if (!db) {
-      console.error('Firestore غير متاح');
+    // الحصول على مثيل Firestore
+    const firestore = getFirestoreInstance();
+    if (!firestore) {
+      console.error('[DataService] Firestore غير متاح، استخدام البيانات الافتراضية');
       return DEFAULT_DATA.categories;
+    }
+    
+    // محاولة الحصول على البيانات من localStorage أولاً
+    const localData = localStorage.getItem("categories");
+    if (localData) {
+      try {
+        const categories = JSON.parse(localData) as Category[];
+        console.log('[DataService] تم قراءة التصنيفات من التخزين المحلي:', categories.length);
+        return categories;
+      } catch (e) {
+        console.error('[DataService] خطأ في تحليل بيانات التصنيفات من التخزين المحلي:', e);
+      }
     }
     
     // محاولة الحصول على البيانات من Firebase
-    const docRef = doc(db, "siteData", "categories");
+    const docRef = doc(firestore as Firestore, "siteData", "categories");
     const docSnap = await getDoc(docRef);
     
     if (docSnap.exists() && docSnap.data().items) {
-      console.log('تم العثور على التصنيفات!', docSnap.data().items.length);
-      return docSnap.data().items;
+      console.log('[DataService] تم العثور على التصنيفات!', docSnap.data().items.length);
+      
+      // تحديث التخزين المحلي بأحدث البيانات
+      localStorage.setItem("categories", JSON.stringify(docSnap.data().items));
+      
+      return docSnap.data().items as Category[];
     }
     
     // محاولة بديلة من مسار آخر
-    const docRefAlt = doc(db, "public_data", "categories");
-    const docSnapAlt = await getDoc(docRefAlt);
-    
-    if (docSnapAlt.exists() && docSnapAlt.data().items) {
-      console.log('تم العثور على التصنيفات في المسار البديل!', docSnapAlt.data().items.length);
-      return docSnapAlt.data().items;
+    try {
+      const docRefAlt = doc(firestore as Firestore, "public_data", "categories");
+      const docSnapAlt = await getDoc(docRefAlt);
+      
+      if (docSnapAlt.exists() && docSnapAlt.data().items) {
+        console.log('[DataService] تم العثور على التصنيفات في المسار البديل!', docSnapAlt.data().items.length);
+        
+        // تحديث التخزين المحلي بأحدث البيانات
+        localStorage.setItem("categories", JSON.stringify(docSnapAlt.data().items));
+        
+        return docSnapAlt.data().items as Category[];
+      }
+    } catch (altError) {
+      console.warn('[DataService] خطأ في قراءة التصنيفات من المسار البديل:', altError);
     }
     
     // إرجاع البيانات الافتراضية إذا لم يتم العثور على بيانات
-    console.log('لم يتم العثور على تصنيفات، إرجاع البيانات الافتراضية');
+    console.log('[DataService] لم يتم العثور على تصنيفات، إرجاع البيانات الافتراضية');
     return DEFAULT_DATA.categories;
   } catch (error) {
-    console.error('خطأ في تحميل التصنيفات:', error);
+    console.error('[DataService] خطأ في تحميل التصنيفات:', error);
+    
+    // محاولة استخدام البيانات المحلية في حالة الخطأ
+    try {
+      const localData = localStorage.getItem("categories");
+      if (localData) {
+        const categories = JSON.parse(localData) as Category[];
+        console.log('[DataService] استخدام البيانات المحلية بعد حدوث خطأ');
+        return categories;
+      }
+    } catch (e) {
+      console.error('[DataService] خطأ في قراءة البيانات المحلية للتصنيفات:', e);
+    }
     
     // إرجاع البيانات الافتراضية في حالة الخطأ
     return DEFAULT_DATA.categories;
