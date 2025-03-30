@@ -4,12 +4,11 @@ import { useRef, useEffect, useState } from "react";
 import { motion, useScroll, useTransform, AnimatePresence } from "framer-motion";
 import Image from "next/image";
 import gsap from "gsap";
-import { FaPlayCircle, FaPauseCircle, FaVolumeUp, FaVolumeMute, FaExpand, FaHeadphones, FaMusic, FaMicrophone, FaFilm, FaAward, FaAddressCard } from "react-icons/fa";
+import { FaPlayCircle, FaPauseCircle, FaVolumeUp, FaVolumeMute, FaExpand, FaHeadphones, FaMusic, FaMicrophone, FaFilm, FaAward } from "react-icons/fa";
 import { getHeroInfo } from "@/lib/firebase/data-service";
 import Link from "next/link";
 import { db } from "@/lib/firebase";
 import { doc, getDoc } from "firebase/firestore";
-import VCardDownloader from "./VCardDownloader";
 
 const textVariants = {
   hidden: { opacity: 0, y: 30 },
@@ -99,7 +98,6 @@ const HeroSection = () => {
   const [heroInfo, setHeroInfo] = useState<HeroData>(defaultHeroInfo);
   const [imagePosition, setImagePosition] = useState<{x: number, y: number, scale: number}>({x: 0, y: 0, scale: 1});
   const heroRef = useRef<HTMLDivElement>(null);
-  const [showVCardDownloader, setShowVCardDownloader] = useState(false);
   
   const { scrollYProgress } = useScroll({
     target: heroRef,
@@ -365,34 +363,6 @@ const HeroSection = () => {
                 ))}
               </motion.div>
               
-              {/* زر تنزيل معلومات الاتصال */}
-              <motion.div
-                custom={3}
-                initial="hidden"
-                animate="visible"
-                variants={textVariants}
-                className="mt-8"
-              >
-                <button 
-                  onClick={() => setShowVCardDownloader(!showVCardDownloader)}
-                  className="group inline-flex items-center gap-2 py-3 px-6 bg-gradient-to-r from-blue-600 to-blue-800 hover:from-blue-700 hover:to-blue-900 text-white rounded-lg transition-all hover:shadow-lg hover:shadow-blue-900/30"
-                >
-                  <FaAddressCard className="text-lg group-hover:scale-110 transition-transform" />
-                  <span className="font-semibold">بطاقة الاتصال</span>
-                </button>
-                
-                {/* مكون تنزيل vCard */}
-                {showVCardDownloader && (
-                  <motion.div 
-                    initial={{ opacity: 0, y: -10 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    className="mt-4 bg-gray-900/70 backdrop-blur-sm p-4 rounded-lg shadow-xl border border-blue-500/20"
-                  >
-                    <VCardDownloader />
-                  </motion.div>
-                )}
-              </motion.div>
-              
               {/* الأزرار */}
               <motion.div
                 custom={4}
@@ -409,10 +379,17 @@ const HeroSection = () => {
                   <span className="absolute inset-0 bg-gradient-to-r from-blue-500 to-indigo-600 opacity-0 group-hover:opacity-100 transition-opacity"></span>
                 </Link>
                 <a 
-                  href="#contact" 
-                  className="px-8 py-4 border border-white/20 text-white font-bold rounded-xl hover:bg-white/5 transition-all duration-300 hover:scale-105 hover:border-blue-400/30 hover:shadow-lg hover:shadow-blue-900/10 hover:-translate-y-1"
+                  href="/karim-contact.vcf" 
+                  download="karim-contact.vcf"
+                  className="relative group px-8 py-4 overflow-hidden bg-gradient-to-r from-purple-600 to-pink-600 text-white font-bold rounded-xl shadow-lg shadow-pink-600/20 transform transition-all duration-300 hover:scale-105 hover:shadow-pink-500/40 hover:-translate-y-1"
                 >
-                  <span>تواصل معي</span>
+                  <span className="relative z-10 flex items-center gap-2">
+                    <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 animate-pulse" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+                    </svg>
+                    تحميل بطاقة التواصل
+                  </span>
+                  <span className="absolute top-0 left-0 w-full h-full bg-white/20 transform -skew-x-12 -translate-x-full group-hover:translate-x-[150%] transition-all duration-1000 ease-out"></span>
                 </a>
               </motion.div>
             </div>
