@@ -262,19 +262,20 @@ export const DataService = {
       const docSnap = await getDoc(docRef);
       
       if (docSnap.exists()) {
-        const data = docSnap.data() as T;
+        const data = docSnap.data();
         console.log(`[DataService] تم الحصول على البيانات: ${documentName}`, data);
         
         // تخزين البيانات في localStorage كنسخة احتياطية
         if (typeof localStorage !== 'undefined') {
           try {
-            localStorage.setItem(`${collectionName}_${documentName}`, JSON.stringify(data));
+            localStorage.setItem(`${collectionName}_${documentName}`, JSON.stringify(data.items || data));
           } catch (error) {
             console.warn(`[DataService] خطأ في تخزين البيانات في localStorage:`, error);
           }
         }
         
-        return data;
+        // إرجاع البيانات - هل هي ضمن حقل items أو مباشرة
+        return (data.items !== undefined ? data.items : data) as T;
       } else {
         throw new Error(`البيانات غير موجودة: ${documentName}`);
       }
@@ -618,7 +619,57 @@ export const DataService = {
   
   // الخبرات
   getExperiences: async (): Promise<Experience[]> => {
-    return await DataService.getData<Experience[]>("siteData", "experiences", DEFAULT_DATA.experiences);
+    console.log("[DataService] جاري تحميل الخبرات المهنية...");
+    
+    // حماية من استدعاء الدالة على جانب الخادم
+    if (typeof window === 'undefined') {
+      console.log("[DataService] getExperiences: تم الاستدعاء على جانب الخادم، إرجاع القيم الافتراضية");
+      return DEFAULT_DATA.experiences;
+    }
+    
+    try {
+      // الحصول على مثيل Firestore
+      const firestore = getFirestoreInstance();
+      if (!firestore) {
+        console.error("[DataService] Firestore غير متاح، استخدام البيانات الافتراضية");
+        return DEFAULT_DATA.experiences;
+      }
+      
+      // محاولة قراءة البيانات من Firestore
+      const docRef = doc(firestore as Firestore, "siteData", "experiences");
+      const docSnap = await getDoc(docRef);
+      
+      if (docSnap.exists()) {
+        const data = docSnap.data();
+        if (data.items && Array.isArray(data.items)) {
+          console.log("[DataService] تم العثور على بيانات الخبرات في Firestore:", data.items.length);
+          
+          // تحديث التخزين المحلي بأحدث البيانات
+          localStorage.setItem("experiences", JSON.stringify(data.items));
+          
+          return data.items;
+        }
+      }
+      
+      // محاولة استعادة البيانات من localStorage
+      const localData = localStorage.getItem("experiences");
+      if (localData) {
+        try {
+          const experiences = JSON.parse(localData);
+          console.log("[DataService] تم قراءة الخبرات من التخزين المحلي:", experiences.length);
+          return experiences;
+        } catch (e) {
+          console.error("[DataService] خطأ في تحليل بيانات الخبرات من التخزين المحلي:", e);
+        }
+      }
+      
+      // استخدام البيانات الافتراضية
+      console.log("[DataService] استخدام البيانات الافتراضية للخبرات");
+      return DEFAULT_DATA.experiences;
+    } catch (error) {
+      console.error("[DataService] خطأ في قراءة بيانات الخبرات:", error);
+      return DEFAULT_DATA.experiences;
+    }
   },
   
   saveExperiences: async (data: Experience[]): Promise<boolean> => {
