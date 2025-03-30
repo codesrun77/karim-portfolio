@@ -4,11 +4,12 @@ import { useRef, useEffect, useState } from "react";
 import { motion, useScroll, useTransform, AnimatePresence } from "framer-motion";
 import Image from "next/image";
 import gsap from "gsap";
-import { FaPlayCircle, FaPauseCircle, FaVolumeUp, FaVolumeMute, FaExpand, FaHeadphones, FaMusic, FaMicrophone, FaFilm, FaAward } from "react-icons/fa";
+import { FaPlayCircle, FaPauseCircle, FaVolumeUp, FaVolumeMute, FaExpand, FaHeadphones, FaMusic, FaMicrophone, FaFilm, FaAward, FaAddressCard } from "react-icons/fa";
 import { getHeroInfo } from "@/lib/firebase/data-service";
 import Link from "next/link";
 import { db } from "@/lib/firebase";
 import { doc, getDoc } from "firebase/firestore";
+import VCardDownloader from "./VCardDownloader";
 
 const textVariants = {
   hidden: { opacity: 0, y: 30 },
@@ -98,6 +99,7 @@ const HeroSection = () => {
   const [heroInfo, setHeroInfo] = useState<HeroData>(defaultHeroInfo);
   const [imagePosition, setImagePosition] = useState<{x: number, y: number, scale: number}>({x: 0, y: 0, scale: 1});
   const heroRef = useRef<HTMLDivElement>(null);
+  const [showVCardDownloader, setShowVCardDownloader] = useState(false);
   
   const { scrollYProgress } = useScroll({
     target: heroRef,
@@ -361,6 +363,34 @@ const HeroSection = () => {
                     </div>
                   </motion.div>
                 ))}
+              </motion.div>
+              
+              {/* زر تنزيل معلومات الاتصال */}
+              <motion.div
+                custom={3}
+                initial="hidden"
+                animate="visible"
+                variants={textVariants}
+                className="mt-8"
+              >
+                <button 
+                  onClick={() => setShowVCardDownloader(!showVCardDownloader)}
+                  className="group inline-flex items-center gap-2 py-3 px-6 bg-gradient-to-r from-blue-600 to-blue-800 hover:from-blue-700 hover:to-blue-900 text-white rounded-lg transition-all hover:shadow-lg hover:shadow-blue-900/30"
+                >
+                  <FaAddressCard className="text-lg group-hover:scale-110 transition-transform" />
+                  <span className="font-semibold">بطاقة الاتصال</span>
+                </button>
+                
+                {/* مكون تنزيل vCard */}
+                {showVCardDownloader && (
+                  <motion.div 
+                    initial={{ opacity: 0, y: -10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    className="mt-4 bg-gray-900/70 backdrop-blur-sm p-4 rounded-lg shadow-xl border border-blue-500/20"
+                  >
+                    <VCardDownloader />
+                  </motion.div>
+                )}
               </motion.div>
               
               {/* الأزرار */}

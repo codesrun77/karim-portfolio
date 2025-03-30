@@ -64,6 +64,35 @@ export interface Experience {
   icon: string;
 }
 
+// معلومات الاتصال الشخصية للتنزيل كـ vCard
+export interface ContactVCard {
+  id?: string;
+  name: string;
+  title: string;
+  photo: string;
+  phones: Array<{number: string; label: string;}>;
+  whatsapp?: string;
+  email?: string;
+  website?: string;
+  address?: string;
+  socialMedia?: {
+    facebook?: string;
+    twitter?: string;
+    instagram?: string;
+    linkedin?: string;
+    youtube?: string;
+  };
+  isActive: boolean;
+}
+
+export interface SocialLink {
+  id: string;
+  icon: string;
+  url: string;
+  label: string;
+}
+
+// واجهة معلومات الاتصال المعروضة
 export interface ContactInfo {
   id: string;
   icon: string;
@@ -75,13 +104,6 @@ export interface ContactInfo {
   subtitle?: string;
   contactType?: string;
   buttonText?: string;
-}
-
-export interface SocialLink {
-  id: string;
-  icon: string;
-  url: string;
-  label: string;
 }
 
 // نموذج بيانات السيرة الذاتية
