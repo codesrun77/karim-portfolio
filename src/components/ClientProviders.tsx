@@ -1,7 +1,9 @@
 'use client';
 
+import { useEffect } from 'react';
 import { Toaster } from 'react-hot-toast';
 import dynamic from 'next/dynamic';
+import { initializeFirebase } from '@/lib/firebase';
 
 // استيراد ديناميكي لمكون OfflineNotice لتجنب أخطاء الـ SSR
 const OfflineNotice = dynamic(() => import('./OfflineNotice'), { ssr: false });
@@ -11,6 +13,15 @@ interface ClientProvidersProps {
 }
 
 export default function ClientProviders({ fontFamily }: ClientProvidersProps) {
+  // تهيئة Firebase عندما يتم تحميل المكون
+  useEffect(() => {
+    try {
+      initializeFirebase();
+    } catch (error) {
+      console.error('فشل تهيئة Firebase في ClientProviders:', error);
+    }
+  }, []);
+
   return (
     <>
       <OfflineNotice />
