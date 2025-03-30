@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import { FaDownload, FaQrcode } from 'react-icons/fa';
 import { ContactVCard } from '@/types';
-import QRCode from 'qrcode.react';
+import { QRCodeSVG } from 'qrcode.react';
 import { getContactVCard } from '@/lib/firebase/data-service';
 
 // وظيفة لإنشاء ملف vCard من بيانات الاتصال
@@ -163,7 +163,7 @@ const VCardDownloader: React.FC = () => {
           {/* عرض رمز QR إذا كان مطلوبًا */}
           {showQR && vCardData && (
             <div className="p-4 bg-white rounded-lg mt-4 flex flex-col items-center">
-              <QRCode 
+              <QRCodeSVG 
                 value={vCardData} 
                 size={200}
                 level="H"
