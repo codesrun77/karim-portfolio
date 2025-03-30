@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from 'react';
-import { FaDownload, FaQrcode } from 'react-icons/fa';
+import { FaDownload } from 'react-icons/fa';
 import { ContactVCard } from '@/types';
 import { getContactVCard } from '@/lib/firebase/data-service';
 
@@ -80,7 +80,6 @@ const generateVCardData = (contact: ContactVCard): string => {
 const VCardDownloader: React.FC = () => {
   const [contact, setContact] = useState<ContactVCard | null>(null);
   const [isLoading, setIsLoading] = useState(true);
-  const [showQR, setShowQR] = useState(false);
   const [vCardData, setVCardData] = useState('');
   
   // تحميل بيانات الاتصال عند تهيئة المكون
@@ -149,31 +148,6 @@ const VCardDownloader: React.FC = () => {
             <FaDownload className="ml-2" />
             <span>تنزيل بطاقة الاتصال</span>
           </button>
-          
-          {/* زر لإظهار رمز QR - تم تعطيله مؤقتاً */}
-          <button
-            onClick={() => setShowQR(!showQR)}
-            className="py-2 px-4 bg-gradient-to-r from-gray-700 to-gray-900 hover:from-gray-800 hover:to-gray-950 text-white rounded-md flex items-center space-x-2 transition-all hover:shadow-lg hover:shadow-gray-900/30"
-          >
-            <FaQrcode className="ml-2" />
-            <span>{showQR ? 'إخفاء وصلة QR' : 'عرض وصلة QR'}</span>
-          </button>
-          
-          {/* عرض رمز QR مبسط */}
-          {showQR && vCardData && (
-            <div className="p-4 bg-white rounded-lg mt-4 flex flex-col items-center">
-              <div className="bg-white p-4 rounded">
-                <div className="text-center text-black">
-                  {/* رابط بدل من كود QR */}
-                  <p className="font-bold mb-2">معلومات الاتصال</p>
-                  <p className="text-sm mb-4 text-gray-700">امسح الرمز الشريطي أو انسخ الرابط لإضافة جهة الاتصال</p>
-                  <div className="p-3 border border-gray-300 rounded bg-gray-100 mb-2">
-                    <code className="text-xs break-all select-all">{vCardData}</code>
-                  </div>
-                </div>
-              </div>
-            </div>
-          )}
         </div>
       )}
     </div>
