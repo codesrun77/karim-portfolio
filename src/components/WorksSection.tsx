@@ -137,7 +137,33 @@ export default function WorksSection() {
     
     // تصفية حسب الفئة
     if (selectedCategory !== "all") {
-      result = result.filter(project => project.category === selectedCategory);
+      console.log(`تصفية حسب التصنيف: "${selectedCategory}"`);
+      console.log(`المشاريع قبل التصفية: ${projects.length}`);
+      
+      // التحقق من نوع التصنيف (سواء كان قنوات-تلفزيونية أو قنوات تلفزيونية)
+      result = result.filter(project => {
+        const normalizedCategory = project.category
+          .replace(/\s+/g, '-')
+          .replace(/[\u0600-\u06FF]/g, (m) => m); // الحفاظ على الأحرف العربية
+          
+        const normalizedSelectedCategory = selectedCategory
+          .replace(/\s+/g, '-')
+          .replace(/[\u0600-\u06FF]/g, (m) => m);
+        
+        const matchesExact = project.category === selectedCategory;
+        const matchesNormalized = normalizedCategory === normalizedSelectedCategory;
+        const matchesNoDash = project.category.replace(/-/g, ' ') === selectedCategory.replace(/-/g, ' ');
+        
+        const hasMatch = matchesExact || matchesNormalized || matchesNoDash;
+        
+        if (hasMatch) {
+          console.log(`تطابق التصنيف للمشروع "${project.title}": ${project.category} == ${selectedCategory}`);
+        }
+        
+        return hasMatch;
+      });
+      
+      console.log(`المشاريع بعد التصفية: ${result.length}`);
     }
     
     // تصفية حسب نص البحث
