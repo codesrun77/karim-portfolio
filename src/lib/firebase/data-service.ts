@@ -830,16 +830,108 @@ export const DataService = {
   },
   
   saveContactInfo: async (data: ContactInfo[]): Promise<boolean> => {
-    return await DataService.saveData<ContactInfo[]>("siteData", "contactInfo", data);
+    console.log("[DataService] بدء حفظ معلومات الاتصال - عدد العناصر:", data.length);
+    try {
+      // الحصول على مثيل Firestore
+      const firestore = getFirestoreInstance();
+      if (!firestore) {
+        console.error("[DataService] حفظ معلومات الاتصال: Firestore غير متاح");
+        return false;
+      }
+      
+      // تحقق من صحة البيانات قبل الحفظ
+      if (!Array.isArray(data)) {
+        console.error("[DataService] خطأ: بيانات الاتصال المراد حفظها ليست مصفوفة");
+        return false;
+      }
+      
+      // تنقية البيانات من أي قيم غير صالحة
+      const validData = data.filter(item => 
+        item && typeof item === 'object' && 
+        item.id && typeof item.id === 'string' &&
+        item.title && typeof item.title === 'string'
+      );
+      
+      if (validData.length !== data.length) {
+        console.warn(`[DataService] تمت إزالة ${data.length - validData.length} عناصر غير صالحة من بيانات الاتصال قبل الحفظ`);
+      }
+      
+      // تحديث البيانات في Firestore مع تنسيق items
+      console.log("[DataService] حفظ معلومات الاتصال في المسار: siteData/contactInfo");
+      
+      const contactInfoRef = doc(firestore, "siteData", "contactInfo");
+      
+      await setDoc(contactInfoRef, { items: validData });
+      console.log("[DataService] تم حفظ معلومات الاتصال بنجاح في Firestore");
+      
+      // تحديث البيانات محلياً أيضاً
+      try {
+        localStorage.setItem("contactInfo", JSON.stringify(validData));
+        console.log("[DataService] تم حفظ معلومات الاتصال في التخزين المحلي");
+      } catch (localError) {
+        console.warn("[DataService] تعذر حفظ معلومات الاتصال في التخزين المحلي:", localError);
+      }
+      
+      return true;
+    } catch (error) {
+      console.error("[DataService] فشل في حفظ معلومات الاتصال:", error);
+      return false;
+    }
   },
   
-  // وسائل التواصل الاجتماعي
+  // روابط التواصل الاجتماعي
   getSocialLinks: async (): Promise<SocialLink[]> => {
     return await DataService.getData<SocialLink[]>("siteData", "socialLinks", DEFAULT_DATA.socialLinks);
   },
   
   saveSocialLinks: async (data: SocialLink[]): Promise<boolean> => {
-    return await DataService.saveData<SocialLink[]>("siteData", "socialLinks", data);
+    console.log("[DataService] بدء حفظ روابط التواصل الاجتماعي - عدد العناصر:", data.length);
+    try {
+      // الحصول على مثيل Firestore
+      const firestore = getFirestoreInstance();
+      if (!firestore) {
+        console.error("[DataService] حفظ روابط التواصل الاجتماعي: Firestore غير متاح");
+        return false;
+      }
+      
+      // تحقق من صحة البيانات قبل الحفظ
+      if (!Array.isArray(data)) {
+        console.error("[DataService] خطأ: روابط التواصل الاجتماعي المراد حفظها ليست مصفوفة");
+        return false;
+      }
+      
+      // تنقية البيانات من أي قيم غير صالحة
+      const validData = data.filter(item => 
+        item && typeof item === 'object' && 
+        item.id && typeof item.id === 'string' &&
+        item.url && typeof item.url === 'string'
+      );
+      
+      if (validData.length !== data.length) {
+        console.warn(`[DataService] تمت إزالة ${data.length - validData.length} عناصر غير صالحة من روابط التواصل الاجتماعي قبل الحفظ`);
+      }
+      
+      // تحديث البيانات في Firestore مع تنسيق items
+      console.log("[DataService] حفظ روابط التواصل الاجتماعي في المسار: siteData/socialLinks");
+      
+      const socialLinksRef = doc(firestore, "siteData", "socialLinks");
+      
+      await setDoc(socialLinksRef, { items: validData });
+      console.log("[DataService] تم حفظ روابط التواصل الاجتماعي بنجاح في Firestore");
+      
+      // تحديث البيانات محلياً أيضاً
+      try {
+        localStorage.setItem("socialLinks", JSON.stringify(validData));
+        console.log("[DataService] تم حفظ روابط التواصل الاجتماعي في التخزين المحلي");
+      } catch (localError) {
+        console.warn("[DataService] تعذر حفظ روابط التواصل الاجتماعي في التخزين المحلي:", localError);
+      }
+      
+      return true;
+    } catch (error) {
+      console.error("[DataService] فشل في حفظ روابط التواصل الاجتماعي:", error);
+      return false;
+    }
   },
   
   // السيرة الذاتية
