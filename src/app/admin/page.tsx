@@ -1,7 +1,7 @@
 "use client";
 import { useState, useEffect, useRef } from "react";
 import AuthCheck from "./AuthCheck";
-import { FaCamera, FaTrash, FaSave, FaPlus, FaTimes, FaUser, FaBriefcase, FaPhone, FaHome, FaClipboard, FaEnvelope, FaWhatsapp, FaEdit, FaMapMarkerAlt, FaProjectDiagram, FaFileAlt, FaPause, FaPlay, FaLink, FaGlobe, FaFacebook, FaInstagram, FaTwitter, FaTv, FaFilm, FaYoutube, FaAward, FaCertificate, FaHistory, FaMicrophone, FaHeadphones, FaChevronUp, FaChevronDown, FaList, FaInfoCircle, FaPalette, FaCheck, FaLinkedin, FaEye, FaEyeSlash, FaImage, FaVideo, FaLock, FaMinus, FaBars, FaUndo, FaArrowUp, FaArrowDown, FaBan } from "react-icons/fa";
+import { FaCamera, FaTrash, FaSave, FaPlus, FaTimes, FaUser, FaBriefcase, FaPhone, FaHome, FaClipboard, FaEnvelope, FaWhatsapp, FaEdit, FaMapMarkerAlt, FaProjectDiagram, FaFileAlt, FaPause, FaPlay, FaLink, FaGlobe, FaFacebook, FaInstagram, FaTwitter, FaTv, FaFilm, FaYoutube, FaAward, FaCertificate, FaHistory, FaMicrophone, FaHeadphones, FaChevronUp, FaChevronDown, FaList, FaInfoCircle, FaPalette, FaCheck, FaLinkedin, FaEye, FaEyeSlash, FaImage, FaVideo, FaLock, FaMinus, FaBars, FaUndo, FaArrowUp, FaArrowDown, FaBan, FaAddressCard } from "react-icons/fa";
 import Image from "next/image";
 import Link from "next/link";
 import { signOut } from "firebase/auth";
@@ -1859,6 +1859,118 @@ const AdminPage = () => {
     }
   }, []);
 
+  // متغيرات حالة بطاقة الاتصال
+  const [contactCardInfo, setContactCardInfo] = useState({
+    fullName: "كريم السيد",
+    title: "مهندس صوت محترف",
+    phone: "+971 50 123 4567",
+    email: "info@karimsound.com",
+    address: "دبي، الإمارات العربية المتحدة",
+    website: "https://karimsound.com"
+  });
+  const [contactCardPreview, setContactCardPreview] = useState<string>("");
+  
+  // دالة تحميل البيانات الأساسية عند تحميل الصفحة
+  useEffect(() => {
+    loadHeroInfo();
+    loadPersonalInfo();
+    loadExperiences();
+    loadProjects();
+    loadContactInfo();
+    loadSocialLinks();
+    loadCVFiles();
+    loadTimelineItems();
+    loadVideoInfo();
+    loadHeaderLinks();
+    loadCategories();
+    loadContactCardInfo();
+  }, []);
+
+  // دالة لتحميل بيانات بطاقة الاتصال
+  const loadContactCardInfo = async () => {
+    try {
+      // قراءة محتوى ملف بطاقة الاتصال الحالي إن وجد
+      const response = await fetch('/karim-contact.vcf');
+      if (response.ok) {
+        const vcfText = await response.text();
+        
+        // استخراج البيانات من محتوى الملف
+        const fullNameMatch = vcfText.match(/FN:(.*)/);
+        const titleMatch = vcfText.match(/TITLE:(.*)/);
+        const phoneMatch = vcfText.match(/TEL;TYPE=CELL:(.*)/);
+        const emailMatch = vcfText.match(/EMAIL:(.*)/);
+        const addressMatch = vcfText.match(/ADR:;;(.*)/);
+        const websiteMatch = vcfText.match(/URL:(.*)/);
+        
+        // تحديث حالة بطاقة الاتصال
+        setContactCardInfo({
+          fullName: fullNameMatch?.[1]?.trim() || "كريم السيد",
+          title: titleMatch?.[1]?.trim() || "مهندس صوت محترف",
+          phone: phoneMatch?.[1]?.trim() || "+971 50 123 4567",
+          email: emailMatch?.[1]?.trim() || "info@karimsound.com",
+          address: addressMatch?.[1]?.trim() || "دبي، الإمارات العربية المتحدة",
+          website: websiteMatch?.[1]?.trim() || "https://karimsound.com"
+        });
+        
+        setContactCardPreview(vcfText);
+        console.log("تم تحميل بيانات بطاقة الاتصال بنجاح");
+      } else {
+        console.log("ملف بطاقة الاتصال غير موجود، سيتم استخدام البيانات الافتراضية");
+      }
+    } catch (error) {
+      console.error("خطأ في تحميل بيانات بطاقة الاتصال:", error);
+    }
+  };
+  
+  // دالة لإنشاء وحفظ ملف بطاقة الاتصال
+  const saveContactCard = async () => {
+    try {
+      setLoading(true);
+      
+      // إنشاء محتوى ملف VCF
+      const vcfContent = [
+        "BEGIN:VCARD",
+        "VERSION:3.0",
+        `N:${contactCardInfo.fullName.split(' ').slice(1).join(' ')};${contactCardInfo.fullName.split(' ')[0]};;;`,
+        `FN:${contactCardInfo.fullName}`,
+        `TITLE:${contactCardInfo.title}`,
+        `TEL;TYPE=CELL:${contactCardInfo.phone}`,
+        `EMAIL:${contactCardInfo.email}`,
+        `ADR:;;${contactCardInfo.address};;;`,
+        `URL:${contactCardInfo.website}`,
+        "END:VCARD"
+      ].join("\n");
+      
+      // تحديث العرض التوضيحي
+      setContactCardPreview(vcfContent);
+      
+      // إرسال البيانات إلى الخادم لحفظها في الملف
+      const response = await fetch('/api/save-contact-card', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          content: vcfContent
+        }),
+      });
+      
+      if (response.ok) {
+        toast.success("تم حفظ بطاقة الاتصال بنجاح");
+        console.log("تم إنشاء وحفظ ملف بطاقة الاتصال بنجاح");
+      } else {
+        const errorData = await response.json();
+        toast.error(`فشل حفظ بطاقة الاتصال: ${errorData.message || 'خطأ غير معروف'}`);
+        console.error("فشل في حفظ ملف بطاقة الاتصال:", errorData);
+      }
+    } catch (error) {
+      console.error("خطأ في إنشاء أو حفظ ملف بطاقة الاتصال:", error);
+      toast.error("حدث خطأ أثناء حفظ بطاقة الاتصال");
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return (
     <AuthCheck>
       <div className="min-h-screen bg-gray-900 text-white py-12">
@@ -1916,6 +2028,12 @@ const AdminPage = () => {
                 className={`px-4 py-2 rounded-lg transition-colors duration-300 ${activeTab === "cv" ? "bg-blue-600" : "bg-gray-700 hover:bg-gray-600"}`}
               >
                 <FaFileAlt className="inline ml-2" /> السيرة الذاتية
+              </button>
+              <button 
+                onClick={() => setActiveTab("contactCard")} 
+                className={`px-4 py-2 rounded-lg transition-colors duration-300 ${activeTab === "contactCard" ? "bg-blue-600" : "bg-gray-700 hover:bg-gray-600"}`}
+              >
+                <FaAddressCard className="inline ml-2" /> بطاقة الاتصال
               </button>
               <button 
                 onClick={() => setActiveTab("timeline")} 
@@ -4652,6 +4770,146 @@ const AdminPage = () => {
                   >
                     <FaSave /> حفظ تغييرات الفوتر
                   </button>
+                </div>
+              </div>
+            </div>
+          )}
+          
+          {/* قسم روابط التواصل الاجتماعي */}
+          {activeTab === "social" && (
+            // ... existing social links content ...
+          )}
+
+          {/* قسم بطاقة الاتصال */}
+          {activeTab === "contactCard" && (
+            <div className="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-6 mb-8">
+              <h2 className="text-2xl font-bold mb-6 text-gray-800 dark:text-white flex items-center">
+                <FaAddressCard className="ml-2 text-blue-500" />
+                إدارة بطاقة الاتصال (VCF)
+              </h2>
+              
+              <div className="mb-8 p-4 bg-blue-50 dark:bg-gray-700 rounded-lg">
+                <p className="text-gray-700 dark:text-gray-300 mb-2">
+                  <strong>ملاحظة:</strong> بطاقة الاتصال (vCard) هي ملف يتيح للزوار حفظ بيانات الاتصال بك على أجهزتهم بسهولة.
+                </p>
+                <p className="text-gray-700 dark:text-gray-300">
+                  يمكن تحميل هذه البطاقة من خلال زر "تحميل بطاقة التواصل" في القسم الرئيسي من الموقع.
+                </p>
+              </div>
+              
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div>
+                  <h3 className="text-xl font-bold mb-4 text-gray-700 dark:text-gray-200">معلومات بطاقة الاتصال</h3>
+                  
+                  <div className="space-y-4">
+                    <div>
+                      <label className="block text-gray-700 dark:text-gray-300 mb-2">الاسم الكامل</label>
+                      <input
+                        type="text"
+                        value={contactCardInfo.fullName}
+                        onChange={(e) => setContactCardInfo({...contactCardInfo, fullName: e.target.value})}
+                        className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+                      />
+                    </div>
+                    
+                    <div>
+                      <label className="block text-gray-700 dark:text-gray-300 mb-2">المسمى الوظيفي</label>
+                      <input
+                        type="text"
+                        value={contactCardInfo.title}
+                        onChange={(e) => setContactCardInfo({...contactCardInfo, title: e.target.value})}
+                        className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+                      />
+                    </div>
+                    
+                    <div>
+                      <label className="block text-gray-700 dark:text-gray-300 mb-2">رقم الهاتف</label>
+                      <input
+                        type="text"
+                        value={contactCardInfo.phone}
+                        onChange={(e) => setContactCardInfo({...contactCardInfo, phone: e.target.value})}
+                        className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+                        placeholder="مثال: +971 50 123 4567"
+                      />
+                    </div>
+                    
+                    <div>
+                      <label className="block text-gray-700 dark:text-gray-300 mb-2">البريد الإلكتروني</label>
+                      <input
+                        type="email"
+                        value={contactCardInfo.email}
+                        onChange={(e) => setContactCardInfo({...contactCardInfo, email: e.target.value})}
+                        className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+                      />
+                    </div>
+                    
+                    <div>
+                      <label className="block text-gray-700 dark:text-gray-300 mb-2">العنوان</label>
+                      <input
+                        type="text"
+                        value={contactCardInfo.address}
+                        onChange={(e) => setContactCardInfo({...contactCardInfo, address: e.target.value})}
+                        className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+                      />
+                    </div>
+                    
+                    <div>
+                      <label className="block text-gray-700 dark:text-gray-300 mb-2">الموقع الإلكتروني</label>
+                      <input
+                        type="url"
+                        value={contactCardInfo.website}
+                        onChange={(e) => setContactCardInfo({...contactCardInfo, website: e.target.value})}
+                        className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+                      />
+                    </div>
+                    
+                    <div className="mt-6">
+                      <button
+                        onClick={saveContactCard}
+                        disabled={loading}
+                        className="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-6 rounded-lg flex items-center transition-all duration-300 disabled:opacity-50"
+                      >
+                        {loading ? (
+                          <span className="flex items-center">
+                            <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                              <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                              <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                            </svg>
+                            جاري الحفظ...
+                          </span>
+                        ) : (
+                          <span className="flex items-center">
+                            <FaSave className="ml-2" />
+                            حفظ بطاقة الاتصال
+                          </span>
+                        )}
+                      </button>
+                    </div>
+                  </div>
+                </div>
+                
+                <div>
+                  <h3 className="text-xl font-bold mb-4 text-gray-700 dark:text-gray-200">معاينة بطاقة الاتصال</h3>
+                  
+                  <div className="bg-gray-100 dark:bg-gray-900 p-4 rounded-lg h-80 overflow-auto font-mono text-sm">
+                    {contactCardPreview ? (
+                      <pre className="text-gray-800 dark:text-gray-300">{contactCardPreview}</pre>
+                    ) : (
+                      <div className="flex items-center justify-center h-full text-gray-500 dark:text-gray-400">
+                        <p>سيظهر هنا معاينة لمحتوى ملف بطاقة الاتصال بعد الحفظ</p>
+                      </div>
+                    )}
+                  </div>
+                  
+                  <div className="mt-6 bg-yellow-50 dark:bg-gray-700 p-4 rounded-lg">
+                    <h4 className="font-bold text-gray-700 dark:text-gray-200 mb-2">كيفية الاستخدام</h4>
+                    <ol className="list-decimal list-inside text-gray-700 dark:text-gray-300 space-y-2">
+                      <li>أدخل المعلومات المطلوبة في النموذج المجاور</li>
+                      <li>اضغط على زر "حفظ بطاقة الاتصال" لإنشاء الملف</li>
+                      <li>سيتم تحديث الملف تلقائيًا وستظهر معاينته هنا</li>
+                      <li>يمكن للزوار تنزيل البطاقة من زر "تحميل بطاقة التواصل" في الصفحة الرئيسية</li>
+                    </ol>
+                  </div>
                 </div>
               </div>
             </div>
