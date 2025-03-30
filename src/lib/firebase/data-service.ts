@@ -706,8 +706,9 @@ export const DataService = {
         return projects.length > 0 ? projects : DEFAULT_DATA.projects;
       }
       
-      // التحقق من وجود db قبل استخدامه
-      if (!db) {
+      // الحصول على مثيل Firestore
+      const firestore = getFirestoreInstance();
+      if (!firestore) {
         console.log("[DataService] Firestore غير متاح، استخدام البيانات المحلية");
         return projects.length > 0 ? projects : DEFAULT_DATA.projects;
       }
@@ -717,7 +718,7 @@ export const DataService = {
       
       // المسار الرئيسي
       try {
-        const docRef = doc(db, "siteData", "projects");
+        const docRef = doc(firestore as Firestore, "siteData", "projects");
         const docSnap = await getDoc(docRef);
         
         if (docSnap.exists()) {
@@ -731,7 +732,7 @@ export const DataService = {
       // إذا فشلت المحاولة الأولى، جرب المسار البديل
       if (!firebaseData) {
         try {
-          const docRef = doc(db, "public_data", "projects");
+          const docRef = doc(firestore as Firestore, "public_data", "projects");
           const docSnap = await getDoc(docRef);
           
           if (docSnap.exists()) {
@@ -746,7 +747,7 @@ export const DataService = {
       // إذا فشلت المحاولة الثانية، جرب المسار الثالث
       if (!firebaseData) {
         try {
-          const docRef = doc(db, "user_content", "projects");
+          const docRef = doc(firestore as Firestore, "user_content", "projects");
           const docSnap = await getDoc(docRef);
           
           if (docSnap.exists()) {
@@ -762,10 +763,22 @@ export const DataService = {
       if (firebaseData && firebaseData.items && Array.isArray(firebaseData.items)) {
         console.log("[DataService] تم العثور على بيانات المشاريع في Firestore:", firebaseData.items.length);
         
-        // تحديث التخزين المحلي بأحدث البيانات
-        localStorage.setItem("projects", JSON.stringify(firebaseData.items));
+        // تنظيف ومعالجة البيانات للتأكد من صحة التصنيفات
+        const cleanedProjects = firebaseData.items.map((project: any) => ({
+          id: project.id || `project-${Date.now()}-${Math.random().toString(36).substring(2, 9)}`,
+          title: project.title || "مشروع جديد",
+          description: project.description || "",
+          image: project.image || "/images/default.jpg",
+          category: project.category || "أخرى",
+          year: project.year || new Date().getFullYear(),
+          isActive: project.isActive !== undefined ? project.isActive : true,
+          link: project.link || ""
+        }));
         
-        return firebaseData.items;
+        // تحديث التخزين المحلي بأحدث البيانات
+        localStorage.setItem("projects", JSON.stringify(cleanedProjects));
+        
+        return cleanedProjects;
       }
       
       // استخدام البيانات المحلية إذا لم نجد شيئًا في Firestore
