@@ -1,6 +1,11 @@
 // استخدام 'use client' لضمان تنفيذ الكود فقط على جانب العميل
 'use client';
 
+import { initializeApp, getApps, getApp, FirebaseApp } from 'firebase/app';
+import { getFirestore, enableIndexedDbPersistence, Firestore } from 'firebase/firestore';
+import { getAuth, Auth } from 'firebase/auth';
+import { getStorage, FirebaseStorage } from 'firebase/storage';
+
 // حل لتتبع حالة التهيئة
 let firebaseInitialized = false;
 
@@ -9,11 +14,6 @@ let firebaseInitialized = false;
  * هذا مهم لتجنب أخطاء تهيئة Firebase على جانب الخادم
  */
 const isBrowser = () => typeof window !== 'undefined';
-
-import { initializeApp, getApps, getApp, FirebaseApp } from 'firebase/app';
-import { getFirestore, enableIndexedDbPersistence, Firestore } from 'firebase/firestore';
-import { getAuth, Auth } from 'firebase/auth';
-import { getStorage, FirebaseStorage } from 'firebase/storage';
 
 // المتغيرات العامة
 let app: FirebaseApp | undefined;
@@ -40,7 +40,7 @@ const firebaseConfig = {
  * 3. تهيئة Firestore والتخزين والمصادقة
  * 4. تمكين التخزين المحلي إذا أمكن
  */
-export const initializeFirebase = () => {
+export function initializeFirebase() {
   try {
     // التنفيذ فقط في المتصفح وإذا لم تتم التهيئة من قبل
     if (isBrowser() && !firebaseInitialized) {
@@ -54,35 +54,46 @@ export const initializeFirebase = () => {
       
       // تهيئة التطبيق إذا لم يكن هناك تطبيق موجود بالفعل
       app = getApps().length > 0 ? getApp() : initializeApp(firebaseConfig);
+      console.log('Firebase App تم إنشاؤه:', app.name);
+      
       db = getFirestore(app);
-      auth = getAuth(app);
-      storage = getStorage(app);
-
+      console.log('Firestore تم تهيئته');
+      
       // محاولة تمكين IndexedDB للاستمرار في العمل دون اتصال
       try {
         if (db) {
-          enableIndexedDbPersistence(db).catch((err) => {
-            if (err.code === 'failed-precondition') {
-              console.warn('التخزين المحلي غير متاح لأن المتصفح مفتوح في علامات تبويب متعددة.');
-            } else if (err.code === 'unimplemented') {
-              console.warn('المتصفح الحالي لا يدعم جميع ميزات التخزين المطلوبة.');
-            } else {
-              console.error('خطأ في تمكين التخزين المستمر:', err);
-            }
-          });
+          enableIndexedDbPersistence(db)
+            .then(() => {
+              console.log('تم تمكين الاحتفاظ بالبيانات محلياً في IndexedDB بنجاح!');
+            })
+            .catch((err) => {
+              if (err.code === 'failed-precondition') {
+                console.warn('التخزين المحلي غير متاح لأن المتصفح مفتوح في علامات تبويب متعددة.');
+              } else if (err.code === 'unimplemented') {
+                console.warn('المتصفح الحالي لا يدعم جميع ميزات التخزين المطلوبة.');
+              } else {
+                console.error('خطأ في تمكين التخزين المستمر:', err);
+              }
+            });
         }
       } catch (e) {
         console.warn('فشل تمكين التخزين المحلي:', e);
       }
+      
+      storage = getStorage(app);
+      console.log('Firebase Storage تم تهيئته');
+      
+      auth = getAuth(app);
+      console.log('Firebase Auth تم تهيئته');
 
       firebaseInitialized = true;
-      console.log('✅ اكتملت تهيئة Firebase بنجاح');
+      console.log('تم تهيئة Firebase بنجاح');
     }
   } catch (error) {
     console.error('❌ خطأ في تهيئة Firebase:', error);
     firebaseInitialized = false;
   }
-};
+}
 
 // دالة مساعدة للحصول على Firestore بطريقة آمنة
 const getFirestoreInstance = (): Firestore | null => {

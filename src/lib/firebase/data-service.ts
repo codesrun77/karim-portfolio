@@ -1,7 +1,7 @@
 /**
  * خدمة البيانات - ملف موحد للتعامل مع جميع عمليات قراءة وكتابة البيانات في Firebase
  */
-import { db } from "../firebase";
+import { db, getFirestoreInstance } from "../firebase";
 import { doc, getDoc, setDoc, collection, getDocs } from "firebase/firestore";
 import {
   HeroInfo,
@@ -249,49 +249,54 @@ export const DataService = {
       console.log(`[DataService] تم الاستدعاء على جانب الخادم، استخدام القيم الافتراضية`);
       return defaultValue;
     }
-
-    // التحقق من حالة الاتصال بالإنترنت
-    if (!navigator.onLine) {
-      console.log(`[DataService] لا يوجد اتصال بالإنترنت، محاولة استخدام البيانات المخزنة محلياً`);
-      return this.getFromLocalStorage(documentName, defaultValue);
-    }
     
     try {
-      // التحقق من وجود db
-      if (!db) {
-        console.error(`[DataService] Firestore غير متاح، محاولة العودة إلى التخزين المحلي`);
-        return this.getFromLocalStorage(documentName, defaultValue);
+      // الحصول على مثيل Firestore
+      const firestore = getFirestoreInstance();
+      if (!firestore) {
+        throw new Error("Firestore غير متاح");
       }
       
-      // قراءة البيانات من Firestore
-      const docRef = doc(db, collectionName, documentName);
+      // محاولة قراءة البيانات من Firestore
+      const docRef = doc(firestore as Firestore, collectionName, documentName);
+      const docSnap = await getDoc(docRef);
       
-      try {
-        const docSnap = await getDoc(docRef);
+      if (docSnap.exists()) {
+        const data = docSnap.data() as T;
+        console.log(`[DataService] تم الحصول على البيانات: ${documentName}`, data);
         
-        if (docSnap.exists()) {
-          const data = docSnap.data();
-          console.log(`[DataService] تم الحصول على البيانات من Firestore: ${documentName}`, data);
-          
-          // نحفظ البيانات في localStorage للاستخدام عند انقطاع الاتصال
-          this.saveToLocalStorage(documentName, data.items || data);
-          
-          // إرجاع البيانات - مع التعامل مع الحالتين (وجود items أو عدم وجودها)
-          return (data.items !== undefined ? data.items : data) as T;
-        } else {
-          console.log(`[DataService] لم يتم العثور على بيانات في Firestore: ${documentName}`);
-          return this.getFromLocalStorage(documentName, defaultValue);
+        // تخزين البيانات في localStorage كنسخة احتياطية
+        if (typeof localStorage !== 'undefined') {
+          try {
+            localStorage.setItem(`${collectionName}_${documentName}`, JSON.stringify(data));
+          } catch (error) {
+            console.warn(`[DataService] خطأ في تخزين البيانات في localStorage:`, error);
+          }
         }
-      } catch (error: any) {
-        if (error?.code === 'unavailable' || error?.code === 'failed-precondition' || error?.message?.includes('offline')) {
-          console.warn(`[DataService] خطأ في الاتصال بـ Firestore: ${error.message || 'غير معروف'}. استخدام البيانات المحلية...`);
-          return this.getFromLocalStorage(documentName, defaultValue);
-        }
-        throw error; // إعادة رمي الأخطاء الأخرى
+        
+        return data;
+      } else {
+        throw new Error(`البيانات غير موجودة: ${documentName}`);
       }
     } catch (error) {
       console.error(`[DataService] خطأ في قراءة البيانات: ${documentName}`, error);
-      return this.getFromLocalStorage(documentName, defaultValue);
+      
+      // محاولة استعادة البيانات من localStorage
+      if (typeof localStorage !== 'undefined') {
+        try {
+          const storedData = localStorage.getItem(`${collectionName}_${documentName}`);
+          if (storedData) {
+            const parsedData = JSON.parse(storedData) as T;
+            console.log(`[DataService] تم الحصول على البيانات من localStorage: ${documentName}`);
+            return parsedData;
+          }
+        } catch (error) {
+          console.warn(`[DataService] خطأ في قراءة البيانات من localStorage:`, error);
+        }
+      }
+      
+      console.log(`[DataService] استخدام القيم الافتراضية لـ: ${documentName}`);
+      return defaultValue;
     }
   },
   
