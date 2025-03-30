@@ -4909,4 +4909,78 @@ END:VCARD`;
 
 // إضافة دالة لعرض الأيقونات
 const getContactIcon = (iconName: string) => {
+  switch (iconName) {
+    case "FaPhone":
+      return <FaPhone />;
+    case "FaEnvelope":
+      return <FaEnvelope />;
+    case "FaWhatsapp":
+      return <FaWhatsapp />;
+    case "FaMapMarkerAlt":
+      return <FaMapMarkerAlt />;
+    case "FaFacebook":
+      return <FaFacebook />;
+    case "FaInstagram":
+      return <FaInstagram />;
+    case "FaTwitter":
+      return <FaTwitter />;
+    case "FaTv":
+      return <FaTv />;
+    case "FaFilm":
+      return <FaFilm />;
+    case "FaYoutube":
+      return <FaYoutube />;
+    case "FaAward":
+      return <FaAward />;
+    case "FaCertificate":
+      return <FaCertificate />;
+    case "FaHistory":
+      return <FaHistory />;
+    case "FaMicrophone":
+      return <FaMicrophone />;
+    case "FaHeadphones":
+      return <FaHeadphones />;
+    case "FaChevronUp":
+      return <FaChevronUp />;
+    case "FaChevronDown":
+      return <FaChevronDown />;
+    case "FaList":
+      return <FaList />;
+    case "FaInfoCircle":
+      return <FaInfoCircle />;
+    case "FaPalette":
+      return <FaPalette />;
+    case "FaCheck":
+      return <FaCheck />;
+    case "FaLinkedin":
+      return <FaLinkedin />;
+    case "FaEye":
+      return <FaEye />;
+    case "FaEyeSlash":
+      return <FaEyeSlash />;
+    case "FaImage":
+      return <FaImage />;
+    case "FaVideo":
+      return <FaVideo />;
+    case "FaLock":
+      return <FaLock />;
+    case "FaMinus":
+      return <FaMinus />;
+    case "FaBars":
+      return <FaBars />;
+    case "FaUndo":
+      return <FaUndo />;
+    case "FaArrowUp":
+      return <FaArrowUp />;
+    case "FaArrowDown":
+      return <FaArrowDown />;
+    case "FaBan":
+      return <FaBan />;
+    case "FaIdCard":
+      return <FaIdCard />;
+    default:
+      return null;
+  }
+};
+
 export default AdminPage; 
