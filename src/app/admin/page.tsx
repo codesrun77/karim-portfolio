@@ -1,6 +1,6 @@
 "use client";
 import { useState, useEffect, useRef } from "react";
-import AuthCheck from "./AuthCheck";
+import AuthCheck from "../components/AuthCheck";
 import { FaCamera, FaTrash, FaSave, FaPlus, FaTimes, FaUser, FaBriefcase, FaPhone, FaHome, FaClipboard, FaEnvelope, FaWhatsapp, FaEdit, FaMapMarkerAlt, FaProjectDiagram, FaFileAlt, FaPause, FaPlay, FaLink, FaGlobe, FaFacebook, FaInstagram, FaTwitter, FaTv, FaFilm, FaYoutube, FaAward, FaCertificate, FaHistory, FaMicrophone, FaHeadphones, FaChevronUp, FaChevronDown, FaList, FaInfoCircle, FaPalette, FaCheck, FaLinkedin, FaEye, FaEyeSlash, FaImage, FaVideo, FaLock, FaMinus, FaBars, FaUndo, FaArrowUp, FaArrowDown, FaBan, FaAddressCard } from "react-icons/fa";
 import Image from "next/image";
 import Link from "next/link";
