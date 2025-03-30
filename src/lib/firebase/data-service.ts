@@ -1,25 +1,21 @@
 /**
  * خدمة البيانات - ملف موحد للتعامل مع جميع عمليات قراءة وكتابة البيانات في Firebase
  */
-import { db, storage } from "../firebase";
-import { doc, getDoc, setDoc, collection, getDocs, query, where, deleteDoc, addDoc, updateDoc, orderBy, limit } from "firebase/firestore";
-import { ref, uploadBytesResumable, getDownloadURL, deleteObject } from "firebase/storage";
+import { db, getFirestoreInstance } from "../firebase";
+import { doc, getDoc, setDoc, collection, getDocs } from "firebase/firestore";
 import {
   HeroInfo,
   PersonalInfo,
   Experience,
   Project,
+  ContactInfo,
   SocialLink,
   CVInfo,
   TimelineItem,
   VideoInfo,
-  Category,
-  ContactVCard
+  Category
 } from "@/types";
-import { getFirestore, Firestore } from 'firebase/firestore';
-
-// استيراد getFirestoreInstance من ملف كاستم
-const getFirestoreInstance = () => db;
+import { getFirestore, addDoc, updateDoc, deleteDoc, DocumentReference, Firestore } from 'firebase/firestore';
 
 // بيانات افتراضية للاستخدام عند عدم توفر البيانات
 const DEFAULT_DATA = {
@@ -2203,137 +2199,5 @@ export const saveVideoInfo = async (videoInfo: VideoInfo): Promise<boolean> => {
       console.error("فشل الحفظ في Firestore والتخزين المحلي:", storageError);
       return false;
     }
-  }
-};
-
-// الحصول على معلومات الاتصال
-export const getContactVCard = async (): Promise<ContactVCard | null> => {
-  try {
-    // محاولة استرداد البيانات من المخزن المحلي أولاً
-    if (typeof window !== 'undefined') {
-      const cachedData = localStorage.getItem('contactVCard');
-      if (cachedData) {
-        console.log('تم استرداد معلومات الاتصال من المخزن المحلي');
-        return JSON.parse(cachedData);
-      }
-    }
-    
-    // إذا لم تكن البيانات موجودة في المخزن المحلي، استردادها من Firestore
-    const contactRef = collection(db, 'contactVCard');
-    const q = query(contactRef, where('isActive', '==', true), limit(1));
-    const snapshot = await getDocs(q);
-    
-    if (!snapshot.empty) {
-      const contactData = snapshot.docs[0].data() as ContactVCard;
-      contactData.id = snapshot.docs[0].id;
-      
-      // تخزين البيانات في المخزن المحلي للاستخدام المستقبلي
-      if (typeof window !== 'undefined') {
-        localStorage.setItem('contactVCard', JSON.stringify(contactData));
-      }
-      
-      console.log('تم استرداد معلومات الاتصال من Firestore');
-      return contactData;
-    }
-    
-    console.log('لم يتم العثور على معلومات الاتصال');
-    return null;
-  } catch (error) {
-    console.error('خطأ في استرداد معلومات الاتصال:', error);
-    return null;
-  }
-};
-
-// حفظ أو تحديث معلومات الاتصال
-export const saveContactVCard = async (contactData: ContactVCard): Promise<{ success: boolean; id?: string; error?: string }> => {
-  try {
-    let docRef;
-    
-    if (contactData.id) {
-      // تحديث مستند موجود
-      docRef = doc(db, 'contactVCard', contactData.id);
-      await updateDoc(docRef, {
-        name: contactData.name || '',
-        title: contactData.title || '',
-        photo: contactData.photo || '',
-        phones: contactData.phones || [],
-        whatsapp: contactData.whatsapp || '',
-        email: contactData.email || '',
-        website: contactData.website || '',
-        address: contactData.address || '',
-        socialMedia: contactData.socialMedia || {},
-        isActive: contactData.isActive !== undefined ? contactData.isActive : true,
-        updatedAt: new Date().toISOString()
-      });
-      
-      console.log('تم تحديث معلومات الاتصال بنجاح');
-    } else {
-      // إنشاء مستند جديد
-      const contactCollection = collection(db, 'contactVCard');
-      docRef = await addDoc(contactCollection, {
-        name: contactData.name || '',
-        title: contactData.title || '',
-        photo: contactData.photo || '',
-        phones: contactData.phones || [],
-        whatsapp: contactData.whatsapp || '',
-        email: contactData.email || '',
-        website: contactData.website || '',
-        address: contactData.address || '',
-        socialMedia: contactData.socialMedia || {},
-        isActive: contactData.isActive !== undefined ? contactData.isActive : true,
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString()
-      });
-      
-      console.log('تم إنشاء معلومات الاتصال بنجاح');
-    }
-    
-    // مسح المخزن المحلي لإجبار التحديث في المرة القادمة
-    if (typeof window !== 'undefined') {
-      localStorage.removeItem('contactVCard');
-    }
-    
-    return {
-      success: true,
-      id: docRef.id
-    };
-  } catch (error) {
-    console.error('خطأ في حفظ معلومات الاتصال:', error);
-    return {
-      success: false,
-      error: error instanceof Error ? error.message : 'حدث خطأ غير معروف'
-    };
-  }
-};
-
-// رفع صورة ملف الاتصال
-export const uploadContactPhoto = async (file: File): Promise<{ url: string } | { error: string }> => {
-  try {
-    const timestamp = new Date().getTime();
-    const storageRef = ref(storage, `contact-photos/${timestamp}_${file.name}`);
-    const uploadTask = uploadBytesResumable(storageRef, file);
-    
-    return new Promise((resolve, reject) => {
-      uploadTask.on(
-        'state_changed',
-        (snapshot) => {
-          // التقدم في عملية الرفع (اختياري)
-          const progress = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
-          console.log('رفع الصورة: ' + progress.toFixed(0) + '%');
-        },
-        (error) => {
-          console.error('خطأ في رفع الصورة:', error);
-          reject({ error: 'فشل في رفع الصورة' });
-        },
-        async () => {
-          // اكتمال الرفع بنجاح، الحصول على URL للتنزيل
-          const downloadURL = await getDownloadURL(uploadTask.snapshot.ref);
-          resolve({ url: downloadURL });
-        }
-      );
-    });
-  } catch (error) {
-    console.error('خطأ في رفع ملف الصورة:', error);
-    return { error: 'فشل في معالجة ملف الصورة' };
   }
 };

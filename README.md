@@ -1,73 +1,36 @@
-# موقع كريم السيد
+This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
 
-[![نشر على Vercel](https://img.shields.io/badge/نشر-Vercel-black?logo=vercel)](https://vercel.com)
+## Getting Started
 
-موقع شخصي مبني بتقنية Next.js لعرض أعمال ومشاريع كريم السيد في مجال هندسة الصوت.
+First, run the development server:
 
-## المميزات
-
-- عرض المشاريع والأعمال بتصميم متوافق مع جميع الأجهزة
-- لوحة تحكم متكاملة لإدارة المحتوى
-- صفحة هيرو متحركة مع إمكانية تحميل بطاقة الاتصال (vCard)
-- قسم للمشاريع مع فلترة حسب التصنيفات
-- قسم للتايم لاين لعرض المسيرة المهنية
-- قسم للتواصل ووسائل الاتصال
-- تخزين بيانات الموقع على Firebase
-
-## التقنيات المستخدمة
-
-- Next.js 15.x
-- TypeScript
-- Tailwind CSS
-- Framer Motion
-- Firebase (Firestore + Storage)
-- React Icons
-
-## متطلبات التشغيل
-
-- Node.js 18.17 أو أحدث
-
-## تثبيت وتشغيل المشروع محلياً
-
-1. استنساخ المشروع:
-```bash
-git clone https://github.com/codesrun77/karim-portfolio.git
-cd karim-portfolio
-```
-
-2. تثبيت الحزم المطلوبة:
-```bash
-npm install
-```
-
-3. إنشاء ملف البيئة المحلية `.env.local` وإضافة بيانات اعتماد Firebase:
-```
-NEXT_PUBLIC_FIREBASE_API_KEY=your_api_key
-NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN=your_auth_domain
-NEXT_PUBLIC_FIREBASE_PROJECT_ID=your_project_id
-NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET=your_storage_bucket
-NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID=your_messaging_sender_id
-NEXT_PUBLIC_FIREBASE_APP_ID=your_app_id
-```
-
-4. تشغيل خادم التطوير:
 ```bash
 npm run dev
+# or
+yarn dev
+# or
+pnpm dev
+# or
+bun dev
 ```
 
-5. فتح المتصفح على عنوان [http://localhost:3000](http://localhost:3000)
+Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
 
-## النشر على Vercel
+You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
 
-يمكن نشر المشروع بسهولة على منصة Vercel باتباع الخطوات التالية:
+This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
 
-1. قم بإنشاء حساب على [Vercel](https://vercel.com) إذا لم يكن لديك واحد.
-2. قم بربط مستودع GitHub الخاص بالمشروع.
-3. أضف متغيرات البيئة المطلوبة (نفس المتغيرات في ملف `.env.local`) في إعدادات المشروع.
-4. انقر على "Deploy" لبدء عملية النشر.
+## Learn More
 
-تم تكوين المشروع باستخدام ملف `vercel.json` لتحسين أداء وأمان النشر.
+To learn more about Next.js, take a look at the following resources:
 
-## ترخيص المشروع
+- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
+- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
 
-جميع الحقوق محفوظة © 2024 كريم السيد
+You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+
+## Deploy on Vercel
+
+The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+
+Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
