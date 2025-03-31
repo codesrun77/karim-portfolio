@@ -4563,41 +4563,54 @@ ADR:;;${vCardInfo.address};;;
 URL:${vCardInfo.website}
 END:VCARD`;
 
-                      // إنشاء ملف blob
-                      const blob = new Blob([vCardText], { type: 'text/vcard' });
-                      
-                      // إنشاء رابط تنزيل للملف
-                      const url = window.URL.createObjectURL(blob);
-                      const a = document.createElement('a');
-                      a.href = url;
-                      a.download = 'karim-contact.vcf';
-                      document.body.appendChild(a);
-                      a.click();
-                      
-                      // تنظيف
-                      window.URL.revokeObjectURL(url);
-                      document.body.removeChild(a);
-                      
-                      // حفظ الملف في المجلد العام
-                      const formData = new FormData();
-                      formData.append('file', new File([blob], 'karim-contact.vcf', { type: 'text/vcard' }));
-                      formData.append('path', '/karim-contact.vcf');
-                      
-                      fetch('/api/upload', {
-                        method: 'POST',
-                        body: formData
-                      })
-                      .then(response => {
-                        if (response.ok) {
+                      // حفظ الملف مباشرة في المجلد العام
+                      try {
+                        // إنشاء ملف blob
+                        const blob = new Blob([vCardText], { type: 'text/vcard' });
+                        
+                        // تنزيل محلي للمستخدم
+                        const url = window.URL.createObjectURL(blob);
+                        const a = document.createElement('a');
+                        a.href = url;
+                        a.download = 'karim-contact.vcf';
+                        document.body.appendChild(a);
+                        a.click();
+                        
+                        // تنظيف
+                        window.URL.revokeObjectURL(url);
+                        document.body.removeChild(a);
+                        
+                        // تحويل Blob إلى File لإرساله في FormData
+                        const file = new File([blob], 'karim-contact.vcf', { type: 'text/vcard' });
+                        
+                        // إنشاء FormData وإضافة الملف والمسار
+                        const formData = new FormData();
+                        formData.append('file', file);
+                        formData.append('path', '/karim-contact.vcf');
+                        
+                        // إرسال الطلب إلى API
+                        fetch('/api/upload', {
+                          method: 'POST',
+                          body: formData
+                        })
+                        .then(response => {
+                          if (!response.ok) {
+                            throw new Error(`HTTP error! status: ${response.status}`);
+                          }
+                          return response.json();
+                        })
+                        .then(data => {
+                          console.log("تم حفظ ملف VCard بنجاح:", data);
                           toast.success("تم حفظ بطاقة التواصل بنجاح");
-                        } else {
-                          toast.error("حدث خطأ أثناء حفظ بطاقة التواصل");
-                        }
-                      })
-                      .catch(error => {
-                        console.error("خطأ في حفظ بطاقة التواصل:", error);
-                        toast.error("حدث خطأ أثناء حفظ بطاقة التواصل");
-                      });
+                        })
+                        .catch(error => {
+                          console.error("خطأ في حفظ بطاقة التواصل:", error);
+                          toast.error(`حدث خطأ أثناء حفظ بطاقة التواصل: ${error.message}`);
+                        });
+                      } catch (error) {
+                        console.error("خطأ في إنشاء ملف بطاقة التواصل:", error);
+                        toast.error("حدث خطأ أثناء إنشاء ملف بطاقة التواصل");
+                      }
                     }}
                     className="px-4 py-2 bg-blue-600 hover:bg-blue-700 rounded-lg transition-colors"
                   >
