@@ -1870,6 +1870,88 @@ const AdminPage = () => {
     }
   }, []);
 
+  // متغيرات حالة بطاقة التواصل
+  const [vCardInfo, setVCardInfo] = useState({
+    firstName: "Karim",
+    lastName: "Al Sayed",
+    title: "Professional Sound Engineer",
+    phone: "+971 50 123 4567",
+    email: "info@karimsound.com",
+    address: "Dubai, United Arab Emirates",
+    website: "https://karimsound.com"
+  });
+  
+  // وظيفة لحفظ بيانات بطاقة التواصل في Firebase
+  const saveVCardToFirebase = async (vCardData: any): Promise<boolean> => {
+    console.log("[Admin] بدء حفظ بيانات بطاقة التواصل في Firebase");
+    try {
+      if (!db) {
+        console.error("[Admin] Firebase غير متاح");
+        return false;
+      }
+      
+      const vCardRef = doc(db, "siteData", "vCardInfo");
+      await setDoc(vCardRef, vCardData);
+      console.log("[Admin] تم حفظ بيانات بطاقة التواصل بنجاح في Firebase");
+      return true;
+    } catch (error) {
+      console.error("[Admin] خطأ في حفظ بيانات بطاقة التواصل في Firebase:", error);
+      return false;
+    }
+  };
+  
+  // وظيفة لتحميل بيانات بطاقة التواصل من Firebase
+  const loadVCardFromFirebase = async () => {
+    console.log("[Admin] محاولة تحميل بيانات بطاقة التواصل من Firebase");
+    try {
+      if (!db) {
+        console.error("[Admin] Firebase غير متاح");
+        return;
+      }
+      
+      const vCardRef = doc(db, "siteData", "vCardInfo");
+      const vCardSnapshot = await getDoc(vCardRef);
+      
+      if (vCardSnapshot.exists()) {
+        const data = vCardSnapshot.data();
+        console.log("[Admin] تم تحميل بيانات بطاقة التواصل من Firebase:", data);
+        setVCardInfo(data);
+      } else {
+        console.log("[Admin] لم يتم العثور على بيانات بطاقة التواصل في Firebase");
+      }
+    } catch (error) {
+      console.error("[Admin] خطأ في تحميل بيانات بطاقة التواصل من Firebase:", error);
+    }
+  };
+
+  useEffect(() => {
+    const loadAllData = async () => {
+      try {
+        console.log("بدء تحميل جميع البيانات");
+        
+        await Promise.all([
+          loadHeaderLinksFromFirebase(),
+          loadProjects(),
+          loadPersonalInfo(),
+          loadExperiences(),
+          loadContactInfo(),
+          loadHeroInfo(),
+          loadSocialLinks(),
+          loadCVFiles(),
+          loadTimelineItems(),
+          loadVideoInfo(),
+          loadVCardFromFirebase() // إضافة تحميل بيانات بطاقة التواصل
+        ]);
+        
+        console.log("تم تحميل جميع البيانات بنجاح");
+      } catch (error) {
+        console.error("حدث خطأ أثناء تحميل البيانات:", error);
+      }
+    };
+    
+    loadAllData();
+  }, []);
+
   return (
     <AuthCheck>
       <div className="min-h-screen bg-gray-900 text-white py-12">
@@ -4563,50 +4645,81 @@ ADR:;;${vCardInfo.address};;;
 URL:${vCardInfo.website}
 END:VCARD`;
 
-                      // حفظ الملف مباشرة في المجلد العام
+                      // حفظ الملف مباشرة في المجلد العام والفايربيس
                       try {
-                        // إنشاء ملف blob
-                        const blob = new Blob([vCardText], { type: 'text/vcard' });
-                        
-                        // تنزيل محلي للمستخدم
-                        const url = window.URL.createObjectURL(blob);
-                        const a = document.createElement('a');
-                        a.href = url;
-                        a.download = 'karim-contact.vcf';
-                        document.body.appendChild(a);
-                        a.click();
-                        
-                        // تنظيف
-                        window.URL.revokeObjectURL(url);
-                        document.body.removeChild(a);
-                        
-                        // تحويل Blob إلى File لإرساله في FormData
-                        const file = new File([blob], 'karim-contact.vcf', { type: 'text/vcard' });
-                        
-                        // إنشاء FormData وإضافة الملف والمسار
-                        const formData = new FormData();
-                        formData.append('file', file);
-                        formData.append('path', '/karim-contact.vcf');
-                        
-                        // إرسال الطلب إلى API
-                        fetch('/api/upload', {
-                          method: 'POST',
-                          body: formData
-                        })
-                        .then(response => {
-                          if (!response.ok) {
-                            throw new Error(`HTTP error! status: ${response.status}`);
-                          }
-                          return response.json();
-                        })
-                        .then(data => {
-                          console.log("تم حفظ ملف VCard بنجاح:", data);
-                          toast.success("تم حفظ بطاقة التواصل بنجاح");
-                        })
-                        .catch(error => {
-                          console.error("خطأ في حفظ بطاقة التواصل:", error);
-                          toast.error(`حدث خطأ أثناء حفظ بطاقة التواصل: ${error.message}`);
-                        });
+                        // حفظ البيانات في Firebase أولاً
+                        const vCardRef = doc(db, "siteData", "vCardInfo");
+                        setDoc(vCardRef, vCardInfo)
+                          .then(() => {
+                            console.log("تم حفظ بيانات بطاقة التواصل في Firebase بنجاح");
+                            
+                            // إنشاء ملف blob
+                            const blob = new Blob([vCardText], { type: 'text/vcard' });
+                            
+                            // تنزيل محلي للمستخدم
+                            const url = window.URL.createObjectURL(blob);
+                            const a = document.createElement('a');
+                            a.href = url;
+                            a.download = 'karim-contact.vcf';
+                            document.body.appendChild(a);
+                            a.click();
+                            
+                            // تنظيف
+                            window.URL.revokeObjectURL(url);
+                            document.body.removeChild(a);
+                            
+                            // تحويل Blob إلى File لإرساله في FormData
+                            const file = new File([blob], 'karim-contact.vcf', { type: 'text/vcard' });
+                            
+                            // إنشاء FormData وإضافة الملف والمسار
+                            const formData = new FormData();
+                            formData.append('file', file);
+                            formData.append('path', '/karim-contact.vcf');
+                            
+                            // إرسال الطلب إلى API
+                            fetch('/api/upload', {
+                              method: 'POST',
+                              body: formData
+                            })
+                            .then(response => {
+                              if (!response.ok) {
+                                throw new Error(`HTTP error! status: ${response.status}`);
+                              }
+                              return response.json();
+                            })
+                            .then(data => {
+                              console.log("تم حفظ ملف VCard بنجاح:", data);
+                              toast.success("تم حفظ بطاقة التواصل بنجاح");
+                            })
+                            .catch(error => {
+                              console.error("خطأ في حفظ ملف بطاقة التواصل:", error);
+                              toast.error(`حدث خطأ أثناء حفظ ملف بطاقة التواصل، لكن تم حفظ البيانات في Firebase`);
+                            });
+                          })
+                          .catch(firebaseError => {
+                            console.error("خطأ في حفظ بيانات بطاقة التواصل في Firebase:", firebaseError);
+                            toast.error("خطأ في حفظ بيانات بطاقة التواصل في Firebase");
+                            
+                            // مع ذلك، سنحاول حفظ الملف المحلي
+                            try {
+                              // إنشاء ملف blob
+                              const blob = new Blob([vCardText], { type: 'text/vcard' });
+                              
+                              // تنزيل محلي للمستخدم
+                              const url = window.URL.createObjectURL(blob);
+                              const a = document.createElement('a');
+                              a.href = url;
+                              a.download = 'karim-contact.vcf';
+                              document.body.appendChild(a);
+                              a.click();
+                              
+                              // تنظيف
+                              window.URL.revokeObjectURL(url);
+                              document.body.removeChild(a);
+                            } catch (clientError) {
+                              console.error("خطأ في إنشاء ملف بطاقة التواصل:", clientError);
+                            }
+                          });
                       } catch (error) {
                         console.error("خطأ في إنشاء ملف بطاقة التواصل:", error);
                         toast.error("حدث خطأ أثناء إنشاء ملف بطاقة التواصل");
