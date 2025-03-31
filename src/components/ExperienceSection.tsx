@@ -118,9 +118,6 @@ const ExperienceSection = () => {
         >
           <h2 className="text-3xl md:text-5xl font-bold text-white mb-4">الخبرات المهنية</h2>
           <div className="h-1 w-24 bg-gradient-to-r from-blue-500 to-purple-500 mx-auto mt-2"></div>
-          <p className="text-gray-300 mt-6 max-w-2xl mx-auto">
-            خبرات متعددة في مجال الصوت والإنتاج الموسيقي على مدار سنوات من العمل الاحترافي
-          </p>
         </motion.div>
         
         {/* محتوى الخبرات */}
