@@ -1,7 +1,7 @@
 "use client";
 import { useState, useEffect, useRef } from "react";
 import AuthCheck from "./AuthCheck";
-import { FaCamera, FaTrash, FaSave, FaPlus, FaTimes, FaUser, FaBriefcase, FaPhone, FaHome, FaClipboard, FaEnvelope, FaWhatsapp, FaEdit, FaMapMarkerAlt, FaProjectDiagram, FaFileAlt, FaPause, FaPlay, FaLink, FaGlobe, FaFacebook, FaInstagram, FaTwitter, FaTv, FaFilm, FaYoutube, FaAward, FaCertificate, FaHistory, FaMicrophone, FaHeadphones, FaChevronUp, FaChevronDown, FaList, FaInfoCircle, FaPalette, FaCheck, FaLinkedin, FaEye, FaEyeSlash, FaImage, FaVideo, FaLock, FaMinus, FaBars, FaUndo, FaArrowUp, FaArrowDown, FaBan, FaIdCard } from "react-icons/fa";
+import { FaCamera, FaTrash, FaSave, FaPlus, FaTimes, FaUser, FaBriefcase, FaPhone, FaHome, FaClipboard, FaEnvelope, FaWhatsapp, FaEdit, FaMapMarkerAlt, FaProjectDiagram, FaFileAlt, FaPause, FaPlay, FaLink, FaGlobe, FaFacebook, FaInstagram, FaTwitter, FaTv, FaFilm, FaYoutube, FaAward, FaCertificate, FaHistory, FaMicrophone, FaHeadphones, FaChevronUp, FaChevronDown, FaList, FaInfoCircle, FaPalette, FaCheck, FaLinkedin, FaEye, FaEyeSlash, FaImage, FaVideo, FaLock, FaMinus, FaBars, FaUndo, FaArrowUp, FaArrowDown, FaBan } from "react-icons/fa";
 import Image from "next/image";
 import Link from "next/link";
 import { signOut } from "firebase/auth";
@@ -327,10 +327,10 @@ const AdminPage = () => {
   const [message, setMessage] = useState<{ type: "success" | "error"; text: string } | null>(null);
 
   // إضافة متغير حالة لتتبع علامة التبويب النشطة  
-  const [activeTab, setActiveTab] = useState<string>("hero");
-  const [projectsSubTab, setProjectsSubTab] = useState<string>("add");
-  const [heroSubTab, setHeroSubTab] = useState<string>("personal");
-  const [timelineFilter, setTimelineFilter] = useState<string>("all");
+  const [activeTab, setActiveTab] = useState("projects");
+  const [projectsSubTab, setProjectsSubTab] = useState("projects");
+  const [heroSubTab, setHeroSubTab] = useState("basic");
+  const [timelineFilter, setTimelineFilter] = useState("all");
 
   // متغيرات حالة السيرة الذاتية
   const [cvFiles, setCVFiles] = useState<CVInfo[]>([]);
@@ -370,26 +370,6 @@ const AdminPage = () => {
     lastUpdate: new Date().toISOString()
   });
 
-  // متغيرات حالة بطاقة الاتصال
-  interface ContactCardInfo {
-    fullName: string;
-    title: string;
-    phone: string;
-    email: string;
-    address: string;
-    website: string;
-  }
-  
-  const [contactCardInfo, setContactCardInfo] = useState<ContactCardInfo>({
-    fullName: "",
-    title: "",
-    phone: "",
-    email: "",
-    address: "",
-    website: ""
-  });
-  const [contactCardPreview, setContactCardPreview] = useState<string>("");
-  
   // في جزء تعريف الحالات (states) أضف الحالات الخاصة بالهيدر
   const [headerLinks, setHeaderLinks] = useState<HeaderLink[]>([]);
   const [newHeaderLink, setNewHeaderLink] = useState({ name: "", url: "" });
@@ -480,7 +460,6 @@ const AdminPage = () => {
       loadTimelineItems();
       loadVideoInfo(); // إضافة تحميل بيانات الفيديو التعريفي
       loadHeaderLinksFromFirebase(); // إضافة تحميل روابط الهيدر
-      loadContactCardInfo(); // إضافة تحميل بيانات بطاقة الاتصال
     }
   }, []);
 
@@ -1539,12 +1518,19 @@ const AdminPage = () => {
   // إضافة دالة تحميل بيانات الفيديو التعريفي
   const loadVideoInfo = async () => {
     try {
-      const data = await getVideoInfo();
-      if (data) {
-        setVideoInfo(data);
+      console.log("جاري تحميل بيانات الفيديو التعريفي...");
+      try {
+        // استخدام getVideoInfo من lib/firebase/data-service بدلاً من DataService.getVideoInfo 
+        const data = await getVideoInfo();
+        if (data) {
+          setVideoInfo(data);
+          console.log("تم تحميل بيانات الفيديو التعريفي");
+        }
+      } catch (err) {
+        console.error("حدث خطأ أثناء تحميل بيانات الفيديو التعريفي:", err);
       }
-    } catch (error) {
-      console.error("خطأ في تحميل معلومات الفيديو التعريفي:", error);
+    } catch (err) {
+      console.error("خطأ خارجي في تحميل بيانات الفيديو التعريفي:", err);
     }
   };
 
@@ -1873,106 +1859,6 @@ const AdminPage = () => {
     }
   }, []);
 
-  // وظيفة تحميل معلومات الفيديو التعريفي
-  const loadVideoInfo = async () => {
-    try {
-      const data = await getVideoInfo();
-      if (data) {
-        setVideoInfo(data);
-      }
-    } catch (error) {
-      console.error("خطأ في تحميل معلومات الفيديو التعريفي:", error);
-    }
-  };
-
-  // وظيفة تحميل بيانات بطاقة الاتصال
-  const loadContactCardInfo = async () => {
-    try {
-      // قراءة محتوى ملف بطاقة الاتصال الحالي إن وجد
-      const response = await fetch('/karim-contact.vcf');
-      if (response.ok) {
-        const vcfText = await response.text();
-        
-        // استخراج البيانات من محتوى الملف
-        const fullNameMatch = vcfText.match(/FN:(.*)/);
-        const titleMatch = vcfText.match(/TITLE:(.*)/);
-        const phoneMatch = vcfText.match(/TEL;TYPE=CELL:(.*)/);
-        const emailMatch = vcfText.match(/EMAIL:(.*)/);
-        const addressMatch = vcfText.match(/ADR:;;(.*)/);
-        const websiteMatch = vcfText.match(/URL:(.*)/);
-        
-        // تحديث حالة بطاقة الاتصال
-        setContactCardInfo({
-          fullName: fullNameMatch?.[1]?.trim() || "كريم السيد",
-          title: titleMatch?.[1]?.trim() || "مهندس صوت محترف",
-          phone: phoneMatch?.[1]?.trim() || "+971 50 123 4567",
-          email: emailMatch?.[1]?.trim() || "info@karimsound.com",
-          address: addressMatch?.[1]?.trim() || "دبي، الإمارات العربية المتحدة",
-          website: websiteMatch?.[1]?.trim() || "https://karimsound.com"
-        });
-        
-        setContactCardPreview(vcfText);
-        console.log("تم تحميل بيانات بطاقة الاتصال بنجاح");
-      } else {
-        console.log("ملف بطاقة الاتصال غير موجود، سيتم استخدام البيانات الافتراضية");
-      }
-    } catch (error) {
-      console.error("خطأ في تحميل بيانات بطاقة الاتصال:", error);
-    }
-  };
-  
-  // دالة لإنشاء وحفظ ملف بطاقة الاتصال
-  const saveContactCard = async () => {
-    try {
-      setLoading(true);
-      
-      // إنشاء محتوى ملف VCF
-      const vcfContent = `BEGIN:VCARD
-VERSION:3.0
-N:${contactCardInfo.fullName}
-FN:${contactCardInfo.fullName}
-TITLE:${contactCardInfo.title}
-TEL;TYPE=CELL:${contactCardInfo.phone}
-EMAIL:${contactCardInfo.email}
-ADR;TYPE=WORK:;;${contactCardInfo.address}
-URL:${contactCardInfo.website}
-END:VCARD`;
-      
-      // تحديث المعاينة
-      setContactCardPreview(vcfContent);
-      
-      // حفظ البيانات في Firestore
-      const docRef = doc(db, 'settings', 'contactCard');
-      await setDoc(docRef, {
-        ...contactCardInfo,
-        vcfContent,
-        updatedAt: new Date().toISOString()
-      });
-      
-      // حفظ ملف VCF في التخزين
-      const storageRef = ref(storage, 'contactCard/contact.vcf');
-      await uploadString(storageRef, vcfContent, 'raw');
-      
-      // الحصول على رابط التحميل
-      const downloadURL = await getDownloadURL(storageRef);
-      
-      // تحديث رابط التحميل في الإعدادات
-      await setDoc(doc(db, 'settings', 'general'), {
-        contactCardURL: downloadURL
-      }, { merge: true });
-      
-      toast.success('تم حفظ بطاقة الاتصال بنجاح');
-    } catch (error) {
-      console.error('فشل في حفظ بطاقة الاتصال:', error);
-      toast.error('حدث خطأ أثناء حفظ بطاقة الاتصال');
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  // دوال تحميل الصور والملفات
-  // ... existing code ...
-
   return (
     <AuthCheck>
       <div className="min-h-screen bg-gray-900 text-white py-12">
@@ -2054,12 +1940,6 @@ END:VCARD`;
                 className={`px-4 py-2 rounded-lg transition-colors duration-300 ${activeTab === "footer" ? "bg-blue-600" : "bg-gray-700 hover:bg-gray-600"}`}
               >
                 <FaList className="inline ml-2" /> الفوتر
-              </button>
-              <button 
-                onClick={() => setActiveTab("contactCard")} 
-                className={`px-4 py-2 rounded-lg transition-colors duration-300 ${activeTab === "contactCard" ? "bg-blue-600" : "bg-gray-700 hover:bg-gray-600"}`}
-              >
-                <FaIdCard className="inline ml-2" /> بطاقة الاتصال
               </button>
             </div>
             </div>
@@ -4776,131 +4656,6 @@ END:VCARD`;
               </div>
             </div>
           )}
-          {/* قسم بطاقة الاتصال */}
-          {activeTab === "contactCard" && (
-            <div className="bg-gray-800 p-6 rounded-lg">
-              <h2 className="text-2xl font-bold mb-6 border-b pb-3 flex items-center">
-                <FaIdCard className="ml-2 text-blue-400" />
-                بطاقة الاتصال (VCF)
-              </h2>
-              
-              <div className="mb-6 bg-blue-900/20 p-4 rounded-lg border border-blue-700/30">
-                <p className="text-gray-300 text-sm">
-                  بطاقة الاتصال (vCard) هي ملف يمكن للزوار تحميله لإضافة معلومات الاتصال الخاصة بك إلى جهات الاتصال على أجهزتهم.
-                  <br />
-                  يتم تحميل بطاقة الاتصال من القسم الرئيسي من خلال زر "تحميل بطاقة التواصل".
-                </p>
-              </div>
-              
-              <div className="space-y-6">
-                {/* الاسم الكامل */}
-                <div>
-                  <label className="block text-sm font-medium text-gray-300 mb-1">الاسم الكامل</label>
-                  <input
-                    type="text"
-                    value={contactCardInfo.fullName}
-                    onChange={(e) => setContactCardInfo({...contactCardInfo, fullName: e.target.value})}
-                    className="w-full p-3 bg-gray-700 border border-gray-600 rounded-md text-white"
-                    placeholder="كريم السيد"
-                  />
-                </div>
-                
-                {/* المسمى الوظيفي */}
-                <div>
-                  <label className="block text-sm font-medium text-gray-300 mb-1">المسمى الوظيفي</label>
-                  <input
-                    type="text"
-                    value={contactCardInfo.title}
-                    onChange={(e) => setContactCardInfo({...contactCardInfo, title: e.target.value})}
-                    className="w-full p-3 bg-gray-700 border border-gray-600 rounded-md text-white"
-                    placeholder="مهندس صوت محترف"
-                  />
-                </div>
-                
-                {/* رقم الهاتف */}
-                <div>
-                  <label className="block text-sm font-medium text-gray-300 mb-1">رقم الهاتف</label>
-                  <input
-                    type="text"
-                    value={contactCardInfo.phone}
-                    onChange={(e) => setContactCardInfo({...contactCardInfo, phone: e.target.value})}
-                    className="w-full p-3 bg-gray-700 border border-gray-600 rounded-md text-white"
-                    placeholder="+971 50 123 4567"
-                    dir="ltr"
-                  />
-                  <p className="text-xs text-gray-400 mt-1">يرجى إدخال الرقم مع رمز الدولة (مثال: 971+)</p>
-                </div>
-                
-                {/* البريد الإلكتروني */}
-                <div>
-                  <label className="block text-sm font-medium text-gray-300 mb-1">البريد الإلكتروني</label>
-                  <input
-                    type="email"
-                    value={contactCardInfo.email}
-                    onChange={(e) => setContactCardInfo({...contactCardInfo, email: e.target.value})}
-                    className="w-full p-3 bg-gray-700 border border-gray-600 rounded-md text-white"
-                    placeholder="info@karimsound.com"
-                    dir="ltr"
-                  />
-                </div>
-                
-                {/* العنوان */}
-                <div>
-                  <label className="block text-sm font-medium text-gray-300 mb-1">العنوان</label>
-                  <input
-                    type="text"
-                    value={contactCardInfo.address}
-                    onChange={(e) => setContactCardInfo({...contactCardInfo, address: e.target.value})}
-                    className="w-full p-3 bg-gray-700 border border-gray-600 rounded-md text-white"
-                    placeholder="دبي، الإمارات العربية المتحدة"
-                  />
-                </div>
-                
-                {/* الموقع الإلكتروني */}
-                <div>
-                  <label className="block text-sm font-medium text-gray-300 mb-1">الموقع الإلكتروني</label>
-                  <input
-                    type="url"
-                    value={contactCardInfo.website}
-                    onChange={(e) => setContactCardInfo({...contactCardInfo, website: e.target.value})}
-                    className="w-full p-3 bg-gray-700 border border-gray-600 rounded-md text-white"
-                    placeholder="https://karimsound.com"
-                    dir="ltr"
-                  />
-                </div>
-                
-                {/* معاينة البطاقة */}
-                {contactCardPreview && (
-                  <div>
-                    <label className="block text-sm font-medium text-gray-300 mb-2">معاينة بطاقة الاتصال</label>
-                    <pre className="bg-gray-900 p-4 rounded-lg text-xs text-gray-300 overflow-x-auto" dir="ltr">
-                      {contactCardPreview}
-                    </pre>
-                  </div>
-                )}
-                
-                {/* زر الحفظ */}
-                <div className="flex justify-center mt-8">
-                  <button
-                    onClick={saveContactCard}
-                    disabled={loading}
-                    className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
-                  >
-                    {loading ? (
-                      <>
-                        <span className="animate-spin h-5 w-5 border-2 border-white border-t-transparent rounded-full"></span>
-                        جاري الحفظ...
-                      </>
-                    ) : (
-                      <>
-                        <FaSave /> حفظ بطاقة الاتصال
-                      </>
-                    )}
-                  </button>
-                </div>
-              </div>
-            </div>
-          )}
         </div>
       </div>
     </AuthCheck>
@@ -4910,77 +4665,337 @@ END:VCARD`;
 // إضافة دالة لعرض الأيقونات
 const getContactIcon = (iconName: string) => {
   switch (iconName) {
-    case "FaPhone":
-      return <FaPhone />;
-    case "FaEnvelope":
-      return <FaEnvelope />;
-    case "FaWhatsapp":
-      return <FaWhatsapp />;
-    case "FaMapMarkerAlt":
-      return <FaMapMarkerAlt />;
-    case "FaFacebook":
-      return <FaFacebook />;
-    case "FaInstagram":
-      return <FaInstagram />;
-    case "FaTwitter":
-      return <FaTwitter />;
-    case "FaTv":
-      return <FaTv />;
-    case "FaFilm":
-      return <FaFilm />;
-    case "FaYoutube":
-      return <FaYoutube />;
-    case "FaAward":
-      return <FaAward />;
-    case "FaCertificate":
-      return <FaCertificate />;
-    case "FaHistory":
-      return <FaHistory />;
-    case "FaMicrophone":
-      return <FaMicrophone />;
-    case "FaHeadphones":
-      return <FaHeadphones />;
-    case "FaChevronUp":
-      return <FaChevronUp />;
-    case "FaChevronDown":
-      return <FaChevronDown />;
-    case "FaList":
-      return <FaList />;
-    case "FaInfoCircle":
-      return <FaInfoCircle />;
-    case "FaPalette":
-      return <FaPalette />;
-    case "FaCheck":
-      return <FaCheck />;
-    case "FaLinkedin":
-      return <FaLinkedin />;
-    case "FaEye":
-      return <FaEye />;
-    case "FaEyeSlash":
-      return <FaEyeSlash />;
-    case "FaImage":
-      return <FaImage />;
-    case "FaVideo":
-      return <FaVideo />;
-    case "FaLock":
-      return <FaLock />;
-    case "FaMinus":
-      return <FaMinus />;
-    case "FaBars":
-      return <FaBars />;
-    case "FaUndo":
-      return <FaUndo />;
-    case "FaArrowUp":
-      return <FaArrowUp />;
-    case "FaArrowDown":
-      return <FaArrowDown />;
-    case "FaBan":
-      return <FaBan />;
-    case "FaIdCard":
-      return <FaIdCard />;
+    case 'FaPhone':
+      return <FaPhone className="inline" />;
+    case 'FaEnvelope':
+      return <FaEnvelope className="inline" />;
+    case 'FaWhatsapp':
+      return <FaWhatsapp className="inline" />;
+    case 'FaMapMarkerAlt':
+      return <FaMapMarkerAlt className="inline" />;
+    case 'FaFacebook':
+      return <FaFacebook className="inline" />;
+    case 'FaInstagram':
+      return <FaInstagram className="inline" />;
+    case 'FaTwitter':
+      return <FaTwitter className="inline" />;
+    case 'FaYoutube':
+      return <FaYoutube className="inline" />;
+    case 'FaLinkedin':
+      return <FaLinkedin className="inline" />;
+    case 'FaGlobe':
+      return <FaGlobe className="inline" />;
     default:
-      return null;
+      return <FaLink className="inline" />;
   }
+};
+
+// الخطأ في التحميل
+const handleError = (error: unknown, message: string) => {
+  console.error(message, error);
+  if (error instanceof Error) {
+    return `${message}: ${error.message}`;
+  }
+  return message;
+};
+
+// معالجة خطأ التحميل
+const handleUploadError = (uploadError: unknown) => {
+  console.error("خطأ في رفع الصورة:", uploadError);
+  alert(handleError(uploadError, "حدث خطأ أثناء رفع الصورة"));
+};
+
+// الحصول على أيقونة وسائل التواصل الاجتماعي
+const getSocialIcon = (iconName: string) => {
+  return getContactIcon(iconName);
+};
+
+// مكون تعديل وضبط الصورة
+const ImageCropper = ({ imageUrl, onCropChange, aspectRatio = 0.8 }: { imageUrl: string, onCropChange: (position: {x: number, y: number, scale: number}) => void, aspectRatio?: number }) => {
+  const containerRef = useRef<HTMLDivElement>(null);
+  const imageRef = useRef<HTMLImageElement>(null);
+  const [isDragging, setIsDragging] = useState(false);
+  const [position, setPosition] = useState({ x: 0, y: 0, scale: 1 });
+  const [startPos, setStartPos] = useState({ x: 0, y: 0 });
+  
+  useEffect(() => {
+    // محاولة استرجاع موضع الصورة من التخزين المحلي عند تحميل المكون
+    try {
+      const savedData = localStorage.getItem('profileImagePosition');
+      if (savedData) {
+        const savedPosition = JSON.parse(savedData);
+        // تحقق من أن الصورة المحفوظة هي نفسها الصورة الحالية
+        if (savedPosition.url === imageUrl) {
+          console.log("استعادة موضع الصورة المحفوظ:", savedPosition.position);
+          setPosition(savedPosition.position);
+          // إرسال الموضع المحفوظ إلى المكون الأب
+          onCropChange(savedPosition.position);
+          return;
+        }
+      }
+    } catch (error) {
+      console.error("خطأ في استعادة موضع الصورة:", error);
+    }
+    
+    // إذا لم يتم العثور على بيانات محفوظة، استخدام الوضع الافتراضي
+    setPosition({ x: 0, y: 0, scale: 1 });
+  }, [imageUrl, onCropChange]);
+  
+  // باقي الكود كما هو
+  const handleMouseDown = (e: React.MouseEvent<HTMLDivElement>) => {
+    if (!imageRef.current) return;
+    
+    setIsDragging(true);
+    setStartPos({
+      x: e.clientX - position.x,
+      y: e.clientY - position.y
+    });
+    
+    e.preventDefault();
+  };
+  
+  const handleTouchStart = (e: React.TouchEvent<HTMLDivElement>) => {
+    if (!imageRef.current || e.touches.length !== 1) return;
+    
+    setIsDragging(true);
+    setStartPos({
+      x: e.touches[0].clientX - position.x,
+      y: e.touches[0].clientY - position.y
+    });
+    
+    e.preventDefault();
+  };
+  
+  const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
+    if (!isDragging || !containerRef.current || !imageRef.current) return;
+    
+    const containerRect = containerRef.current.getBoundingClientRect();
+    const imageRect = imageRef.current.getBoundingClientRect();
+    
+    // حساب الحدود القصوى للتحريك
+    const maxX = (imageRect.width * position.scale - containerRect.width) / 2;
+    const maxY = (imageRect.height * position.scale - containerRect.height) / 2;
+    
+    let newX = e.clientX - startPos.x;
+    let newY = e.clientY - startPos.y;
+    
+    // تقييد الحركة داخل حدود العنصر الحاوي
+    newX = Math.max(-maxX, Math.min(maxX, newX));
+    newY = Math.max(-maxY, Math.min(maxY, newY));
+    
+    setPosition(prev => ({
+      ...prev,
+      x: newX,
+      y: newY
+    }));
+    
+    // إرسال التغيير إلى الأعلى
+    onCropChange({ x: newX, y: newY, scale: position.scale });
+  };
+  
+  const handleTouchMove = (e: React.TouchEvent<HTMLDivElement>) => {
+    if (!isDragging || !containerRef.current || !imageRef.current || e.touches.length !== 1) return;
+    
+    const containerRect = containerRef.current.getBoundingClientRect();
+    const imageRect = imageRef.current.getBoundingClientRect();
+    
+    // حساب الحدود القصوى للتحريك
+    const maxX = (imageRect.width * position.scale - containerRect.width) / 2;
+    const maxY = (imageRect.height * position.scale - containerRect.height) / 2;
+    
+    let newX = e.touches[0].clientX - startPos.x;
+    let newY = e.touches[0].clientY - startPos.y;
+    
+    // تقييد الحركة داخل حدود العنصر الحاوي
+    newX = Math.max(-maxX, Math.min(maxX, newX));
+    newY = Math.max(-maxY, Math.min(maxY, newY));
+    
+    setPosition(prev => ({
+      ...prev,
+      x: newX,
+      y: newY
+    }));
+    
+    // إرسال التغيير إلى الأعلى
+    onCropChange({ x: newX, y: newY, scale: position.scale });
+  };
+  
+  const handleMouseUp = () => {
+    setIsDragging(false);
+  };
+  
+  const handleTouchEnd = () => {
+    setIsDragging(false);
+  };
+  
+  const handleWheel = (e: React.WheelEvent<HTMLDivElement>) => {
+    e.preventDefault();
+    
+    // تحديث حجم الصورة عند استخدام عجلة الماوس
+    const delta = -e.deltaY;
+    const scaleChange = delta > 0 ? 0.1 : -0.1;
+    const newScale = Math.max(1, Math.min(3, position.scale + scaleChange));
+    
+    setPosition(prev => ({
+      ...prev,
+      scale: newScale
+    }));
+    
+    // إرسال التغيير إلى الأعلى
+    onCropChange({ x: position.x, y: position.y, scale: newScale });
+  };
+  
+  // تفعيل الاستماع لأحداث المستند لمتابعة الحركة حتى خارج العنصر
+  useEffect(() => {
+    if (isDragging) {
+      const handleGlobalMouseMove = (e: MouseEvent) => {
+        if (containerRef.current && imageRef.current) {
+          const containerRect = containerRef.current.getBoundingClientRect();
+          const imageRect = imageRef.current.getBoundingClientRect();
+          
+          const maxX = (imageRect.width * position.scale - containerRect.width) / 2;
+          const maxY = (imageRect.height * position.scale - containerRect.height) / 2;
+          
+          let newX = e.clientX - startPos.x;
+          let newY = e.clientY - startPos.y;
+          
+          newX = Math.max(-maxX, Math.min(maxX, newX));
+          newY = Math.max(-maxY, Math.min(maxY, newY));
+          
+          setPosition(prev => ({
+            ...prev,
+            x: newX,
+            y: newY
+          }));
+          
+          onCropChange({ x: newX, y: newY, scale: position.scale });
+        }
+      };
+      
+      const handleGlobalTouchMove = (e: TouchEvent) => {
+        if (e.touches.length !== 1 || !containerRef.current || !imageRef.current) return;
+        
+        const containerRect = containerRef.current.getBoundingClientRect();
+        const imageRect = imageRef.current.getBoundingClientRect();
+        
+        const maxX = (imageRect.width * position.scale - containerRect.width) / 2;
+        const maxY = (imageRect.height * position.scale - containerRect.height) / 2;
+        
+        let newX = e.touches[0].clientX - startPos.x;
+        let newY = e.touches[0].clientY - startPos.y;
+        
+        newX = Math.max(-maxX, Math.min(maxX, newX));
+        newY = Math.max(-maxY, Math.min(maxY, newY));
+        
+        setPosition(prev => ({
+          ...prev,
+          x: newX,
+          y: newY
+        }));
+        
+        onCropChange({ x: newX, y: newY, scale: position.scale });
+      };
+      
+      const handleGlobalMouseUp = () => {
+        setIsDragging(false);
+      };
+      
+      const handleGlobalTouchEnd = () => {
+        setIsDragging(false);
+      };
+      
+      document.addEventListener('mousemove', handleGlobalMouseMove);
+      document.addEventListener('mouseup', handleGlobalMouseUp);
+      document.addEventListener('touchmove', handleGlobalTouchMove);
+      document.addEventListener('touchend', handleGlobalTouchEnd);
+      
+      return () => {
+        document.removeEventListener('mousemove', handleGlobalMouseMove);
+        document.removeEventListener('mouseup', handleGlobalMouseUp);
+        document.removeEventListener('touchmove', handleGlobalTouchMove);
+        document.removeEventListener('touchend', handleGlobalTouchEnd);
+      };
+    }
+  }, [isDragging, startPos, position.scale, onCropChange]);
+  
+  return (
+    <div className="flex flex-col items-center">
+      <div
+        ref={containerRef}
+        className="relative w-full max-w-md h-0 pb-[125%] overflow-hidden border border-white/20 rounded-2xl shadow-[0_0_25px_rgba(8,112,184,0.3)] cursor-move touch-none"
+        onMouseDown={handleMouseDown}
+        onMouseMove={handleMouseMove}
+        onMouseUp={handleMouseUp}
+        onTouchStart={handleTouchStart}
+        onTouchMove={handleTouchMove}
+        onTouchEnd={handleTouchEnd}
+        onWheel={handleWheel}
+      >
+        <div className="absolute inset-0 bg-gradient-to-br from-transparent via-black/10 to-transparent z-10 mix-blend-overlay"></div>
+        <div 
+          className="absolute inset-0"
+          style={{ 
+            transform: `translate(${position.x}px, ${position.y}px) scale(${position.scale})`,
+            transformOrigin: 'center',
+            transition: isDragging ? 'none' : 'transform 0.1s ease-out'
+          }}
+        >
+          <img
+            ref={imageRef}
+            src={imageUrl}
+            alt="معاينة الصورة الشخصية"
+            className="w-full h-full object-contain p-1.5 rounded-2xl"
+            draggable="false"
+            onDragStart={e => e.preventDefault()}
+          />
+        </div>
+        {/* تأثير خفيف متدرج من الأسفل للأعلى */}
+        <div className="absolute inset-x-0 bottom-0 h-1/4 bg-gradient-to-t from-black/40 to-transparent z-20 rounded-b-2xl"></div>
+      </div>
+      
+      <div className="flex items-center space-x-4 mt-4 w-full max-w-md px-2">
+        <button
+          onClick={() => {
+            setPosition(prev => ({ ...prev, scale: Math.max(1, prev.scale - 0.1) }));
+            onCropChange({ ...position, scale: Math.max(1, position.scale - 0.1) });
+          }}
+          className="p-2 bg-gray-700 rounded-full text-white hover:bg-gray-600"
+          title="تصغير"
+        >
+          <FaMinus />
+        </button>
+        
+        <input 
+          type="range" 
+          min="1" 
+          max="3" 
+          step="0.1" 
+          value={position.scale} 
+          onChange={e => {
+            const newScale = parseFloat(e.target.value);
+            setPosition(prev => ({ ...prev, scale: newScale }));
+            onCropChange({ ...position, scale: newScale });
+          }}
+          className="w-full bg-gray-700 h-1 rounded-full appearance-none"
+        />
+        
+        <button
+          onClick={() => {
+            setPosition(prev => ({ ...prev, scale: Math.min(3, prev.scale + 0.1) }));
+            onCropChange({ ...position, scale: Math.min(3, position.scale + 0.1) });
+          }}
+          className="p-2 bg-gray-700 rounded-full text-white hover:bg-gray-600"
+          title="تكبير"
+        >
+          <FaPlus />
+        </button>
+      </div>
+      
+      <div className="text-xs text-gray-400 mt-2 text-center">
+        <p>اسحب الصورة لضبط الموضع - استخدم عجلة الماوس أو شريط التمرير للتكبير/التصغير</p>
+      </div>
+    </div>
+  );
 };
 
 export default AdminPage; 
