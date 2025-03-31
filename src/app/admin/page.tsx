@@ -1,7 +1,7 @@
 "use client";
 import { useState, useEffect, useRef } from "react";
 import AuthCheck from "./AuthCheck";
-import { FaCamera, FaTrash, FaSave, FaPlus, FaTimes, FaUser, FaBriefcase, FaPhone, FaHome, FaClipboard, FaEnvelope, FaWhatsapp, FaEdit, FaMapMarkerAlt, FaProjectDiagram, FaFileAlt, FaPause, FaPlay, FaLink, FaGlobe, FaFacebook, FaInstagram, FaTwitter, FaTv, FaFilm, FaYoutube, FaAward, FaCertificate, FaHistory, FaMicrophone, FaHeadphones, FaChevronUp, FaChevronDown, FaList, FaInfoCircle, FaPalette, FaCheck, FaLinkedin, FaEye, FaEyeSlash, FaImage, FaVideo, FaLock, FaMinus, FaBars, FaUndo, FaArrowUp, FaArrowDown, FaBan } from "react-icons/fa";
+import { FaCamera, FaTrash, FaSave, FaPlus, FaTimes, FaUser, FaBriefcase, FaPhone, FaHome, FaClipboard, FaEnvelope, FaWhatsapp, FaEdit, FaMapMarkerAlt, FaProjectDiagram, FaFileAlt, FaPause, FaPlay, FaLink, FaGlobe, FaFacebook, FaInstagram, FaTwitter, FaTv, FaFilm, FaYoutube, FaAward, FaCertificate, FaHistory, FaMicrophone, FaHeadphones, FaChevronUp, FaChevronDown, FaList, FaInfoCircle, FaPalette, FaCheck, FaLinkedin, FaEye, FaEyeSlash, FaImage, FaVideo, FaLock, FaMinus, FaBars, FaUndo, FaArrowUp, FaArrowDown, FaBan, FaIdCard, FaDownload } from "react-icons/fa";
 import Image from "next/image";
 import Link from "next/link";
 import { signOut } from "firebase/auth";
@@ -368,6 +368,17 @@ const AdminPage = () => {
     thumbnailUrl: "/images/video-thumbnail.jpg",
     isActive: true,
     lastUpdate: new Date().toISOString()
+  });
+
+  // متغيرات حالة بطاقة التواصل
+  const [vCardInfo, setVCardInfo] = useState({
+    firstName: "Karim",
+    lastName: "Al Sayed",
+    title: "Professional Sound Engineer",
+    phone: "+971 50 123 4567",
+    email: "info@karimsound.com",
+    address: "Dubai, United Arab Emirates",
+    website: "https://karimsound.com"
   });
 
   // في جزء تعريف الحالات (states) أضف الحالات الخاصة بالهيدر
@@ -1940,6 +1951,12 @@ const AdminPage = () => {
                 className={`px-4 py-2 rounded-lg transition-colors duration-300 ${activeTab === "footer" ? "bg-blue-600" : "bg-gray-700 hover:bg-gray-600"}`}
               >
                 <FaList className="inline ml-2" /> الفوتر
+              </button>
+              <button 
+                onClick={() => setActiveTab("vcard")} 
+                className={`px-4 py-2 rounded-lg transition-colors duration-300 ${activeTab === "vcard" ? "bg-blue-600" : "bg-gray-700 hover:bg-gray-600"}`}
+              >
+                <FaIdCard className="inline ml-2" /> بطاقة التواصل
               </button>
             </div>
             </div>
@@ -4388,270 +4405,214 @@ const AdminPage = () => {
           {/* قسم الفوتر */}
           {activeTab === "footer" && (
             <div className="bg-gray-800 p-6 rounded-lg">
-              <h2 className="text-2xl font-bold mb-6 border-b pb-3">إدارة تذييل الموقع (الفوتر)</h2>
-              
-              <div className="space-y-6">
-                {/* النبذة التعريفية في الفوتر */}
-                <div className="bg-gray-700 p-4 rounded-lg">
-                  <h3 className="text-xl font-medium mb-4">النبذة التعريفية</h3>
-                  <textarea 
-                    value={footerData.bio} 
+              <h2 className="text-2xl font-bold mb-6">إعدادات الفوتر</h2>
+              {/* محتوى قسم الفوتر */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                {/* النبذة المختصرة */}
+                <div>
+                  <h3 className="text-xl font-semibold mb-3">النبذة المختصرة</h3>
+                  <textarea
+                    value={footerData.bio}
                     onChange={(e) => setFooterData({...footerData, bio: e.target.value})}
-                    rows={3}
-                    className="mt-1 block w-full p-3 bg-gray-600 border border-gray-600 rounded-md text-white"
-                    placeholder="اكتب نبذة تعريفية مختصرة تظهر في الفوتر"
+                    className="w-full h-32 p-2 bg-gray-700 rounded border border-gray-600 text-white"
                   />
                 </div>
                 
-                {/* الروابط السريعة */}
-                <div className="bg-gray-700 p-4 rounded-lg">
-                  <h3 className="text-xl font-medium mb-4">الروابط السريعة</h3>
-                  
-                  <div className="overflow-x-auto">
-                    <table className="w-full text-right">
-                      <thead className="bg-gray-800">
-                        <tr>
-                          <th className="px-4 py-2">الاسم</th>
-                          <th className="px-4 py-2">الرابط</th>
-                          <th className="px-4 py-2">الإجراءات</th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        {footerData.quickLinks.map((link, index) => (
-                          <tr key={index} className="border-b border-gray-600 last:border-0">
-                            <td className="px-4 py-3">
-                              <input 
-                                type="text" 
-                                value={link.name} 
-                                onChange={(e) => {
-                                  const newLinks = [...footerData.quickLinks];
-                                  newLinks[index] = { ...newLinks[index], name: e.target.value };
-                                  setFooterData({...footerData, quickLinks: newLinks});
-                                }}
-                                className="w-full p-2 bg-gray-600 border border-gray-600 rounded-md text-white"
-                              />
-                            </td>
-                            <td className="px-4 py-3">
-                              <input 
-                                type="text" 
-                                value={link.url} 
-                                onChange={(e) => {
-                                  const newLinks = [...footerData.quickLinks];
-                                  newLinks[index] = { ...newLinks[index], url: e.target.value };
-                                  setFooterData({...footerData, quickLinks: newLinks});
-                                }}
-                                className="w-full p-2 bg-gray-600 border border-gray-600 rounded-md text-white"
-                              />
-                            </td>
-                            <td className="px-4 py-3">
-                              <button 
-                                onClick={() => {
-                                  const newLinks = footerData.quickLinks.filter((_, i) => i !== index);
-                                  setFooterData({...footerData, quickLinks: newLinks});
-                                }}
-                                className="p-1 text-white bg-red-600 rounded hover:bg-red-500"
-                                title="حذف"
-                              >
-                                <FaTrash />
-                              </button>
-                            </td>
-                          </tr>
-                        ))}
-                      </tbody>
-                    </table>
-                  </div>
-                  
-                  <div className="mt-4 bg-gray-800 p-3 rounded-lg">
-                    <h4 className="text-md font-medium mb-2">إضافة رابط جديد</h4>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                      <input 
-                        type="text" 
-                        placeholder="اسم الرابط" 
-                        className="p-2 bg-gray-700 border border-gray-600 rounded-md text-white"
-                        id="newQuickLinkName"
-                      />
-                      <input 
-                        type="text" 
-                        placeholder="عنوان الرابط (URL)" 
-                        className="p-2 bg-gray-700 border border-gray-600 rounded-md text-white"
-                        id="newQuickLinkUrl"
-                      />
-                    </div>
-                    <button 
-                      onClick={() => {
-                        const nameEl = document.getElementById('newQuickLinkName') as HTMLInputElement;
-                        const urlEl = document.getElementById('newQuickLinkUrl') as HTMLInputElement;
-                        if (nameEl?.value && urlEl?.value) {
-                          setFooterData({
-                            ...footerData, 
-                            quickLinks: [...footerData.quickLinks, { name: nameEl.value, url: urlEl.value }]
-                          });
-                          nameEl.value = '';
-                          urlEl.value = '';
-                        } else {
-                          toast.error("يرجى إدخال اسم ورابط صحيحين");
-                        }
-                      }}
-                      className="mt-2 bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-md flex items-center gap-2"
-                    >
-                      <FaPlus /> إضافة
-                    </button>
-                  </div>
-                </div>
-                
-                {/* معلومات التواصل */}
-                <div className="bg-gray-700 p-4 rounded-lg">
-                  <h3 className="text-xl font-medium mb-4">معلومات التواصل</h3>
-                  
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {/* معلومات الاتصال */}
+                <div>
+                  <h3 className="text-xl font-semibold mb-3">معلومات الاتصال</h3>
+                  <div className="space-y-3">
                     <div>
-                      <label className="block text-sm font-medium text-gray-300">واتساب</label>
-                      <input 
-                        type="text" 
-                        value={footerData.contactInfo.whatsapp} 
+                      <label className="block mb-1">واتساب</label>
+                      <input
+                        type="text"
+                        value={footerData.contactInfo.whatsapp}
                         onChange={(e) => setFooterData({
-                          ...footerData, 
+                          ...footerData,
                           contactInfo: {...footerData.contactInfo, whatsapp: e.target.value}
                         })}
-                        className="mt-1 block w-full p-3 bg-gray-600 border border-gray-600 rounded-md text-white"
-                        placeholder="مثال: +971 521007811"
+                        className="w-full p-2 bg-gray-700 rounded border border-gray-600 text-white"
                       />
                     </div>
-                    
                     <div>
-                      <label className="block text-sm font-medium text-gray-300">البريد الإلكتروني</label>
-                      <input 
-                        type="email" 
-                        value={footerData.contactInfo.email} 
+                      <label className="block mb-1">البريد الإلكتروني</label>
+                      <input
+                        type="email"
+                        value={footerData.contactInfo.email}
                         onChange={(e) => setFooterData({
-                          ...footerData, 
+                          ...footerData,
                           contactInfo: {...footerData.contactInfo, email: e.target.value}
                         })}
-                        className="mt-1 block w-full p-3 bg-gray-600 border border-gray-600 rounded-md text-white"
-                        placeholder="مثال: info@example.com"
+                        className="w-full p-2 bg-gray-700 rounded border border-gray-600 text-white"
+                      />
+                    </div>
+                    <div>
+                      <label className="block mb-1">العنوان</label>
+                      <input
+                        type="text"
+                        value={footerData.contactInfo.location}
+                        onChange={(e) => setFooterData({
+                          ...footerData,
+                          contactInfo: {...footerData.contactInfo, location: e.target.value}
+                        })}
+                        className="w-full p-2 bg-gray-700 rounded border border-gray-600 text-white"
                       />
                     </div>
                   </div>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* قسم بطاقة التواصل */}
+          {activeTab === "vcard" && (
+            <div className="bg-gray-800 p-6 rounded-lg">
+              <h2 className="text-2xl font-bold mb-6">إعدادات بطاقة التواصل (VCard)</h2>
+              <p className="text-gray-400 mb-6">
+                هذه البيانات ستستخدم في ملف بطاقة التواصل (VCard) الذي يمكن للزوار تحميله وإضافته لجهات الاتصال لديهم.
+              </p>
+              
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div>
+                  <div className="mb-4">
+                    <label className="block mb-1 font-medium">الاسم الأول</label>
+                    <input
+                      type="text"
+                      value={vCardInfo.firstName}
+                      onChange={(e) => setVCardInfo({...vCardInfo, firstName: e.target.value})}
+                      className="w-full p-3 bg-gray-700 rounded border border-gray-600 text-white"
+                    />
+                  </div>
                   
-                  <div className="mt-4">
-                    <label className="block text-sm font-medium text-gray-300">الموقع</label>
-                    <input 
-                      type="text" 
-                      value={footerData.contactInfo.location} 
-                      onChange={(e) => setFooterData({
-                        ...footerData, 
-                        contactInfo: {...footerData.contactInfo, location: e.target.value}
-                      })}
-                      className="mt-1 block w-full p-3 bg-gray-600 border border-gray-600 rounded-md text-white"
-                      placeholder="مثال: دبي، الإمارات العربية المتحدة"
+                  <div className="mb-4">
+                    <label className="block mb-1 font-medium">الاسم الأخير</label>
+                    <input
+                      type="text"
+                      value={vCardInfo.lastName}
+                      onChange={(e) => setVCardInfo({...vCardInfo, lastName: e.target.value})}
+                      className="w-full p-3 bg-gray-700 rounded border border-gray-600 text-white"
+                    />
+                  </div>
+                  
+                  <div className="mb-4">
+                    <label className="block mb-1 font-medium">المسمى الوظيفي</label>
+                    <input
+                      type="text"
+                      value={vCardInfo.title}
+                      onChange={(e) => setVCardInfo({...vCardInfo, title: e.target.value})}
+                      className="w-full p-3 bg-gray-700 rounded border border-gray-600 text-white"
+                    />
+                  </div>
+                  
+                  <div className="mb-4">
+                    <label className="block mb-1 font-medium">رقم الهاتف</label>
+                    <input
+                      type="text"
+                      value={vCardInfo.phone}
+                      onChange={(e) => setVCardInfo({...vCardInfo, phone: e.target.value})}
+                      className="w-full p-3 bg-gray-700 rounded border border-gray-600 text-white"
                     />
                   </div>
                 </div>
                 
-                {/* روابط التواصل الاجتماعي */}
-                <div className="bg-gray-700 p-4 rounded-lg">
-                  <h3 className="text-xl font-medium mb-4">روابط التواصل الاجتماعي</h3>
+                <div>
+                  <div className="mb-4">
+                    <label className="block mb-1 font-medium">البريد الإلكتروني</label>
+                    <input
+                      type="email"
+                      value={vCardInfo.email}
+                      onChange={(e) => setVCardInfo({...vCardInfo, email: e.target.value})}
+                      className="w-full p-3 bg-gray-700 rounded border border-gray-600 text-white"
+                    />
+                  </div>
                   
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                    <div>
-                      <label className="block text-sm font-medium text-gray-300 flex items-center">
-                        <FaFacebook className="ml-2 text-blue-500" /> فيسبوك
-                      </label>
-                      <input 
-                        type="text" 
-                        value={footerData.socialLinks.facebook} 
-                        onChange={(e) => setFooterData({
-                          ...footerData, 
-                          socialLinks: {...footerData.socialLinks, facebook: e.target.value}
-                        })}
-                        className="mt-1 block w-full p-3 bg-gray-600 border border-gray-600 rounded-md text-white"
-                        placeholder="رابط صفحة الفيسبوك"
-                      />
-                    </div>
-                    
-                    <div>
-                      <label className="block text-sm font-medium text-gray-300 flex items-center">
-                        <FaInstagram className="ml-2 text-pink-500" /> انستغرام
-                      </label>
-                      <input 
-                        type="text" 
-                        value={footerData.socialLinks.instagram} 
-                        onChange={(e) => setFooterData({
-                          ...footerData, 
-                          socialLinks: {...footerData.socialLinks, instagram: e.target.value}
-                        })}
-                        className="mt-1 block w-full p-3 bg-gray-600 border border-gray-600 rounded-md text-white"
-                        placeholder="رابط حساب الانستغرام"
-                      />
-                    </div>
-                    
-                    <div>
-                      <label className="block text-sm font-medium text-gray-300 flex items-center">
-                        <FaYoutube className="ml-2 text-red-500" /> يوتيوب
-                      </label>
-                      <input 
-                        type="text" 
-                        value={footerData.socialLinks.youtube} 
-                        onChange={(e) => setFooterData({
-                          ...footerData, 
-                          socialLinks: {...footerData.socialLinks, youtube: e.target.value}
-                        })}
-                        className="mt-1 block w-full p-3 bg-gray-600 border border-gray-600 rounded-md text-white"
-                        placeholder="رابط قناة اليوتيوب"
-                      />
-                    </div>
+                  <div className="mb-4">
+                    <label className="block mb-1 font-medium">العنوان</label>
+                    <input
+                      type="text"
+                      value={vCardInfo.address}
+                      onChange={(e) => setVCardInfo({...vCardInfo, address: e.target.value})}
+                      className="w-full p-3 bg-gray-700 rounded border border-gray-600 text-white"
+                    />
+                  </div>
+                  
+                  <div className="mb-4">
+                    <label className="block mb-1 font-medium">الموقع الإلكتروني</label>
+                    <input
+                      type="text"
+                      value={vCardInfo.website}
+                      onChange={(e) => setVCardInfo({...vCardInfo, website: e.target.value})}
+                      className="w-full p-3 bg-gray-700 rounded border border-gray-600 text-white"
+                    />
                   </div>
                 </div>
-                
-                {/* حقوق الملكية */}
-                <div className="bg-gray-700 p-4 rounded-lg">
-                  <h3 className="text-xl font-medium mb-4">حقوق الملكية والتطوير</h3>
-                  
-                  <div className="space-y-4">
-                    <div>
-                      <label className="block text-sm font-medium text-gray-300">نص حقوق الملكية</label>
-                      <input 
-                        type="text" 
-                        value={footerData.copyright} 
-                        onChange={(e) => setFooterData({...footerData, copyright: e.target.value})}
-                        className="mt-1 block w-full p-3 bg-gray-600 border border-gray-600 rounded-md text-white"
-                        placeholder="مثال: كريم السيد. جميع الحقوق محفوظة."
-                      />
-                    </div>
-                    
-                    <div>
-                      <label className="block text-sm font-medium text-gray-300">اسم المطوّر</label>
-                      <input 
-                        type="text" 
-                        value="Codesrun" 
-                        disabled
-                        className="mt-1 block w-full p-3 bg-gray-700 border border-gray-600 rounded-md text-gray-400 cursor-not-allowed"
-                      />
-                      <p className="text-xs text-gray-400 mt-1">لا يمكن تغيير اسم المطوّر</p>
-                    </div>
-                  </div>
-                </div>
-                
-                {/* زر الحفظ */}
-                <div className="flex justify-end">
-                  <button 
+              </div>
+              
+              <div className="mt-6 flex justify-between items-center">
+                <div>
+                  <button
                     onClick={() => {
-                      try {
-                        if (typeof window !== 'undefined') {
-                          localStorage.setItem('footerData', JSON.stringify(footerData));
-                          toast.success("تم حفظ بيانات الفوتر بنجاح");
-                          alert("تم حفظ بيانات الفوتر بنجاح!");
+                      const vCardText = `BEGIN:VCARD
+VERSION:3.0
+N:${vCardInfo.lastName};${vCardInfo.firstName};;;
+FN:${vCardInfo.firstName} ${vCardInfo.lastName}
+TITLE:${vCardInfo.title}
+TEL;TYPE=CELL:${vCardInfo.phone}
+EMAIL:${vCardInfo.email}
+ADR:;;${vCardInfo.address};;;
+URL:${vCardInfo.website}
+END:VCARD`;
+
+                      // إنشاء ملف blob
+                      const blob = new Blob([vCardText], { type: 'text/vcard' });
+                      
+                      // إنشاء رابط تنزيل للملف
+                      const url = window.URL.createObjectURL(blob);
+                      const a = document.createElement('a');
+                      a.href = url;
+                      a.download = 'karim-contact.vcf';
+                      document.body.appendChild(a);
+                      a.click();
+                      
+                      // تنظيف
+                      window.URL.revokeObjectURL(url);
+                      document.body.removeChild(a);
+                      
+                      // حفظ الملف في المجلد العام
+                      const formData = new FormData();
+                      formData.append('file', new File([blob], 'karim-contact.vcf', { type: 'text/vcard' }));
+                      formData.append('path', '/karim-contact.vcf');
+                      
+                      fetch('/api/upload', {
+                        method: 'POST',
+                        body: formData
+                      })
+                      .then(response => {
+                        if (response.ok) {
+                          toast.success("تم حفظ بطاقة التواصل بنجاح");
+                        } else {
+                          toast.error("حدث خطأ أثناء حفظ بطاقة التواصل");
                         }
-                      } catch (error) {
-                        console.error("خطأ في حفظ بيانات الفوتر:", error);
-                        toast.error("حدث خطأ أثناء حفظ بيانات الفوتر");
-                        alert("فشل حفظ بيانات الفوتر");
-                      }
+                      })
+                      .catch(error => {
+                        console.error("خطأ في حفظ بطاقة التواصل:", error);
+                        toast.error("حدث خطأ أثناء حفظ بطاقة التواصل");
+                      });
                     }}
-                    className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg flex items-center gap-2"
+                    className="px-4 py-2 bg-blue-600 hover:bg-blue-700 rounded-lg transition-colors"
                   >
-                    <FaSave /> حفظ تغييرات الفوتر
+                    <FaSave className="inline ml-2" /> حفظ بطاقة التواصل
                   </button>
+                </div>
+                
+                <div>
+                  <a
+                    href="/karim-contact.vcf"
+                    download
+                    className="px-4 py-2 bg-green-600 hover:bg-green-700 rounded-lg transition-colors inline-flex items-center"
+                  >
+                    <FaDownload className="mr-2" /> معاينة بطاقة التواصل الحالية
+                  </a>
                 </div>
               </div>
             </div>
