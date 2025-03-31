@@ -1870,88 +1870,6 @@ const AdminPage = () => {
     }
   }, []);
 
-  // متغيرات حالة بطاقة التواصل
-  const [vCardInfo, setVCardInfo] = useState({
-    firstName: "Karim",
-    lastName: "Al Sayed",
-    title: "Professional Sound Engineer",
-    phone: "+971 50 123 4567",
-    email: "info@karimsound.com",
-    address: "Dubai, United Arab Emirates",
-    website: "https://karimsound.com"
-  });
-  
-  // وظيفة لحفظ بيانات بطاقة التواصل في Firebase
-  const saveVCardToFirebase = async (vCardData: any): Promise<boolean> => {
-    console.log("[Admin] بدء حفظ بيانات بطاقة التواصل في Firebase");
-    try {
-      if (!db) {
-        console.error("[Admin] Firebase غير متاح");
-        return false;
-      }
-      
-      const vCardRef = doc(db, "siteData", "vCardInfo");
-      await setDoc(vCardRef, vCardData);
-      console.log("[Admin] تم حفظ بيانات بطاقة التواصل بنجاح في Firebase");
-      return true;
-    } catch (error) {
-      console.error("[Admin] خطأ في حفظ بيانات بطاقة التواصل في Firebase:", error);
-      return false;
-    }
-  };
-  
-  // وظيفة لتحميل بيانات بطاقة التواصل من Firebase
-  const loadVCardFromFirebase = async () => {
-    console.log("[Admin] محاولة تحميل بيانات بطاقة التواصل من Firebase");
-    try {
-      if (!db) {
-        console.error("[Admin] Firebase غير متاح");
-        return;
-      }
-      
-      const vCardRef = doc(db, "siteData", "vCardInfo");
-      const vCardSnapshot = await getDoc(vCardRef);
-      
-      if (vCardSnapshot.exists()) {
-        const data = vCardSnapshot.data();
-        console.log("[Admin] تم تحميل بيانات بطاقة التواصل من Firebase:", data);
-        setVCardInfo(data);
-      } else {
-        console.log("[Admin] لم يتم العثور على بيانات بطاقة التواصل في Firebase");
-      }
-    } catch (error) {
-      console.error("[Admin] خطأ في تحميل بيانات بطاقة التواصل من Firebase:", error);
-    }
-  };
-
-  useEffect(() => {
-    const loadAllData = async () => {
-      try {
-        console.log("بدء تحميل جميع البيانات");
-        
-        await Promise.all([
-          loadHeaderLinksFromFirebase(),
-          loadProjects(),
-          loadPersonalInfo(),
-          loadExperiences(),
-          loadContactInfo(),
-          loadHeroInfo(),
-          loadSocialLinks(),
-          loadCVFiles(),
-          loadTimelineItems(),
-          loadVideoInfo(),
-          loadVCardFromFirebase() // إضافة تحميل بيانات بطاقة التواصل
-        ]);
-        
-        console.log("تم تحميل جميع البيانات بنجاح");
-      } catch (error) {
-        console.error("حدث خطأ أثناء تحميل البيانات:", error);
-      }
-    };
-    
-    loadAllData();
-  }, []);
-
   return (
     <AuthCheck>
       <div className="min-h-screen bg-gray-900 text-white py-12">
@@ -4493,24 +4411,24 @@ const AdminPage = () => {
                 {/* النبذة المختصرة */}
                 <div>
                   <h3 className="text-xl font-semibold mb-3">النبذة المختصرة</h3>
-                  <textarea
-                    value={footerData.bio}
+                  <textarea 
+                    value={footerData.bio} 
                     onChange={(e) => setFooterData({...footerData, bio: e.target.value})}
                     className="w-full h-32 p-2 bg-gray-700 rounded border border-gray-600 text-white"
                   />
                 </div>
                 
                 {/* معلومات الاتصال */}
-                <div>
+                    <div>
                   <h3 className="text-xl font-semibold mb-3">معلومات الاتصال</h3>
                   <div className="space-y-3">
                     <div>
                       <label className="block mb-1">واتساب</label>
-                      <input
-                        type="text"
-                        value={footerData.contactInfo.whatsapp}
+                      <input 
+                        type="text" 
+                        value={footerData.contactInfo.whatsapp} 
                         onChange={(e) => setFooterData({
-                          ...footerData,
+                          ...footerData, 
                           contactInfo: {...footerData.contactInfo, whatsapp: e.target.value}
                         })}
                         className="w-full p-2 bg-gray-700 rounded border border-gray-600 text-white"
@@ -4518,11 +4436,11 @@ const AdminPage = () => {
                     </div>
                     <div>
                       <label className="block mb-1">البريد الإلكتروني</label>
-                      <input
-                        type="email"
-                        value={footerData.contactInfo.email}
+                      <input 
+                        type="email" 
+                        value={footerData.contactInfo.email} 
                         onChange={(e) => setFooterData({
-                          ...footerData,
+                          ...footerData, 
                           contactInfo: {...footerData.contactInfo, email: e.target.value}
                         })}
                         className="w-full p-2 bg-gray-700 rounded border border-gray-600 text-white"
@@ -4530,17 +4448,17 @@ const AdminPage = () => {
                     </div>
                     <div>
                       <label className="block mb-1">العنوان</label>
-                      <input
-                        type="text"
-                        value={footerData.contactInfo.location}
-                        onChange={(e) => setFooterData({
-                          ...footerData,
-                          contactInfo: {...footerData.contactInfo, location: e.target.value}
-                        })}
+                    <input 
+                      type="text" 
+                      value={footerData.contactInfo.location} 
+                      onChange={(e) => setFooterData({
+                        ...footerData, 
+                        contactInfo: {...footerData.contactInfo, location: e.target.value}
+                      })}
                         className="w-full p-2 bg-gray-700 rounded border border-gray-600 text-white"
-                      />
-                    </div>
+                    />
                   </div>
+                </div>
                 </div>
               </div>
             </div>
@@ -4555,36 +4473,36 @@ const AdminPage = () => {
               </p>
               
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div>
+                    <div>
                   <div className="mb-4">
                     <label className="block mb-1 font-medium">الاسم الأول</label>
-                    <input
-                      type="text"
+                      <input 
+                        type="text" 
                       value={vCardInfo.firstName}
                       onChange={(e) => setVCardInfo({...vCardInfo, firstName: e.target.value})}
                       className="w-full p-3 bg-gray-700 rounded border border-gray-600 text-white"
-                    />
-                  </div>
-                  
+                      />
+                    </div>
+                    
                   <div className="mb-4">
                     <label className="block mb-1 font-medium">الاسم الأخير</label>
-                    <input
-                      type="text"
+                      <input 
+                        type="text" 
                       value={vCardInfo.lastName}
                       onChange={(e) => setVCardInfo({...vCardInfo, lastName: e.target.value})}
                       className="w-full p-3 bg-gray-700 rounded border border-gray-600 text-white"
-                    />
-                  </div>
-                  
+                      />
+                    </div>
+                    
                   <div className="mb-4">
                     <label className="block mb-1 font-medium">المسمى الوظيفي</label>
-                    <input
-                      type="text"
+                      <input 
+                        type="text" 
                       value={vCardInfo.title}
                       onChange={(e) => setVCardInfo({...vCardInfo, title: e.target.value})}
                       className="w-full p-3 bg-gray-700 rounded border border-gray-600 text-white"
-                    />
-                  </div>
+                      />
+                    </div>
                   
                   <div className="mb-4">
                     <label className="block mb-1 font-medium">رقم الهاتف</label>
@@ -4597,7 +4515,7 @@ const AdminPage = () => {
                   </div>
                 </div>
                 
-                <div>
+                    <div>
                   <div className="mb-4">
                     <label className="block mb-1 font-medium">البريد الإلكتروني</label>
                     <input
@@ -4610,29 +4528,29 @@ const AdminPage = () => {
                   
                   <div className="mb-4">
                     <label className="block mb-1 font-medium">العنوان</label>
-                    <input
-                      type="text"
+                      <input 
+                        type="text" 
                       value={vCardInfo.address}
                       onChange={(e) => setVCardInfo({...vCardInfo, address: e.target.value})}
                       className="w-full p-3 bg-gray-700 rounded border border-gray-600 text-white"
-                    />
-                  </div>
-                  
+                      />
+                    </div>
+                    
                   <div className="mb-4">
                     <label className="block mb-1 font-medium">الموقع الإلكتروني</label>
-                    <input
-                      type="text"
+                      <input 
+                        type="text" 
                       value={vCardInfo.website}
                       onChange={(e) => setVCardInfo({...vCardInfo, website: e.target.value})}
                       className="w-full p-3 bg-gray-700 rounded border border-gray-600 text-white"
-                    />
+                      />
+                    </div>
                   </div>
                 </div>
-              </div>
-              
+                
               <div className="mt-6 flex justify-between items-center">
                 <div>
-                  <button
+                  <button 
                     onClick={() => {
                       const vCardText = `BEGIN:VCARD
 VERSION:3.0
@@ -4645,81 +4563,50 @@ ADR:;;${vCardInfo.address};;;
 URL:${vCardInfo.website}
 END:VCARD`;
 
-                      // حفظ الملف مباشرة في المجلد العام والفايربيس
+                      // حفظ الملف مباشرة في المجلد العام
                       try {
-                        // حفظ البيانات في Firebase أولاً
-                        const vCardRef = doc(db, "siteData", "vCardInfo");
-                        setDoc(vCardRef, vCardInfo)
-                          .then(() => {
-                            console.log("تم حفظ بيانات بطاقة التواصل في Firebase بنجاح");
-                            
-                            // إنشاء ملف blob
-                            const blob = new Blob([vCardText], { type: 'text/vcard' });
-                            
-                            // تنزيل محلي للمستخدم
-                            const url = window.URL.createObjectURL(blob);
-                            const a = document.createElement('a');
-                            a.href = url;
-                            a.download = 'karim-contact.vcf';
-                            document.body.appendChild(a);
-                            a.click();
-                            
-                            // تنظيف
-                            window.URL.revokeObjectURL(url);
-                            document.body.removeChild(a);
-                            
-                            // تحويل Blob إلى File لإرساله في FormData
-                            const file = new File([blob], 'karim-contact.vcf', { type: 'text/vcard' });
-                            
-                            // إنشاء FormData وإضافة الملف والمسار
-                            const formData = new FormData();
-                            formData.append('file', file);
-                            formData.append('path', '/karim-contact.vcf');
-                            
-                            // إرسال الطلب إلى API
-                            fetch('/api/upload', {
-                              method: 'POST',
-                              body: formData
-                            })
-                            .then(response => {
-                              if (!response.ok) {
-                                throw new Error(`HTTP error! status: ${response.status}`);
-                              }
-                              return response.json();
-                            })
-                            .then(data => {
-                              console.log("تم حفظ ملف VCard بنجاح:", data);
-                              toast.success("تم حفظ بطاقة التواصل بنجاح");
-                            })
-                            .catch(error => {
-                              console.error("خطأ في حفظ ملف بطاقة التواصل:", error);
-                              toast.error(`حدث خطأ أثناء حفظ ملف بطاقة التواصل، لكن تم حفظ البيانات في Firebase`);
-                            });
-                          })
-                          .catch(firebaseError => {
-                            console.error("خطأ في حفظ بيانات بطاقة التواصل في Firebase:", firebaseError);
-                            toast.error("خطأ في حفظ بيانات بطاقة التواصل في Firebase");
-                            
-                            // مع ذلك، سنحاول حفظ الملف المحلي
-                            try {
-                              // إنشاء ملف blob
-                              const blob = new Blob([vCardText], { type: 'text/vcard' });
-                              
-                              // تنزيل محلي للمستخدم
-                              const url = window.URL.createObjectURL(blob);
-                              const a = document.createElement('a');
-                              a.href = url;
-                              a.download = 'karim-contact.vcf';
-                              document.body.appendChild(a);
-                              a.click();
-                              
-                              // تنظيف
-                              window.URL.revokeObjectURL(url);
-                              document.body.removeChild(a);
-                            } catch (clientError) {
-                              console.error("خطأ في إنشاء ملف بطاقة التواصل:", clientError);
-                            }
-                          });
+                        // إنشاء ملف blob
+                        const blob = new Blob([vCardText], { type: 'text/vcard' });
+                        
+                        // تنزيل محلي للمستخدم
+                        const url = window.URL.createObjectURL(blob);
+                        const a = document.createElement('a');
+                        a.href = url;
+                        a.download = 'karim-contact.vcf';
+                        document.body.appendChild(a);
+                        a.click();
+                        
+                        // تنظيف
+                        window.URL.revokeObjectURL(url);
+                        document.body.removeChild(a);
+                        
+                        // تحويل Blob إلى File لإرساله في FormData
+                        const file = new File([blob], 'karim-contact.vcf', { type: 'text/vcard' });
+                        
+                        // إنشاء FormData وإضافة الملف والمسار
+                        const formData = new FormData();
+                        formData.append('file', file);
+                        formData.append('path', '/karim-contact.vcf');
+                        
+                        // إرسال الطلب إلى API
+                        fetch('/api/upload', {
+                          method: 'POST',
+                          body: formData
+                        })
+                        .then(response => {
+                          if (!response.ok) {
+                            throw new Error(`HTTP error! status: ${response.status}`);
+                          }
+                          return response.json();
+                        })
+                        .then(data => {
+                          console.log("تم حفظ ملف VCard بنجاح:", data);
+                          toast.success("تم حفظ بطاقة التواصل بنجاح");
+                        })
+                        .catch(error => {
+                          console.error("خطأ في حفظ بطاقة التواصل:", error);
+                          toast.error(`حدث خطأ أثناء حفظ بطاقة التواصل: ${error.message}`);
+                        });
                       } catch (error) {
                         console.error("خطأ في إنشاء ملف بطاقة التواصل:", error);
                         toast.error("حدث خطأ أثناء إنشاء ملف بطاقة التواصل");

@@ -1,18 +1,8 @@
 {
   "framework": "nextjs",
   "buildCommand": "next build",
-  "devCommand": "next dev",
-  "ignoreCommand": "npx @vercel/style-guide linting:engine",
   "installCommand": "npm install",
   "outputDirectory": ".next",
-  "crons": [],
-  "cleanUrls": true,
-  "build": {
-    "env": {
-      "NEXT_PUBLIC_BASE_URL": "https://karimsound.com",
-      "NODE_VERSION": "18.x"
-    }
-  },
   "regions": ["dub1"],
   "env": {
     "NODE_ENV": "production"
