@@ -218,9 +218,6 @@ const TimelineSection = () => {
           className="text-center mb-16"
         >
           <h2 className="text-4xl md:text-5xl font-bold mb-6 text-gradient bg-gradient-to-r from-blue-500 to-purple-600 inline-block">السيرة الذاتية</h2>
-          <p className="text-gray-300 text-xl max-w-3xl mx-auto">
-            تضم مسيرتي المهنية العديد من المشاريع والإنجازات في مجال هندسة الصوت والمونتاج والإنتاج.
-          </p>
           
           <motion.div 
             initial={{ opacity: 0, y: 20 }}
