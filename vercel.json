@@ -5,9 +5,6 @@
   "ignoreCommand": "npx @vercel/style-guide linting:engine",
   "installCommand": "npm install",
   "outputDirectory": ".next",
-  "routes": [
-    { "src": "/(.*)", "dest": "/" }
-  ],
   "crons": [],
   "cleanUrls": true,
   "build": {
