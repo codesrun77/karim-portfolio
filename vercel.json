@@ -12,7 +12,8 @@
   "cleanUrls": true,
   "build": {
     "env": {
-      "NEXT_PUBLIC_BASE_URL": "https://karimsound.com"
+      "NEXT_PUBLIC_BASE_URL": "https://karimsound.com",
+      "NODE_VERSION": "18.x"
     }
   },
   "regions": ["dub1"],
